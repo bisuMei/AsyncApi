@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+    container_name: elastic    
+    environment:
+      discovery.type: "single-node"
+    ports:
+      - 9200:9200
+    expose:
+      - "9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      movie_proj:
+
+  redis:
+    image: redis:6.2.6
+    container_name: redis-cache    
+    ports:
+      - 6379:6379
+    expose:
+      - "6379"
+    command:
+      - redis-server    
+    networks:
+      movie_proj:
+
+networks:
+  movie_proj:
+    external: true
+  default:
+
+volumes:
+  elasticsearch-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/elasticsearch-data
+      o: bind
+  
