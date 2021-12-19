@@ -19,7 +19,7 @@ class Film(BaseModel):
     imdb_rating: float
     genre: List[str]
     title: str
-    description: str
+    description: Optional[str]
     director: Optional[str]
     actors_names: List[str]
     writers_names: List[str]
