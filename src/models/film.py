@@ -1,7 +1,7 @@
 import orjson
 
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 def orjson_dumps(v, *, default):
@@ -20,11 +20,11 @@ class Film(BaseModel):
     genre: List[str]
     title: str
     description: str
-    director: str
-    actors: List[InstanceSchema]
-    writers: List[InstanceSchema]
+    director: Optional[str]
     actors_names: List[str]
     writers_names: List[str]
+    actors: List[InstanceSchema]
+    writers: List[InstanceSchema]
 
     class Config:
         json_loads = orjson.loads
@@ -34,7 +34,7 @@ class Film(BaseModel):
 class Genre(BaseModel):
     id: str
     name: str
-    description: str
+    description: Optional[str]
 
     class Config:
         json_loads = orjson.loads
@@ -44,7 +44,7 @@ class Genre(BaseModel):
 class Person(BaseModel):
     id: str
     full_name: str
-    role: str
+    role: List[str]
 
     class Config:
         json_loads = orjson.loads
