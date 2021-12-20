@@ -100,7 +100,14 @@ class FilmService:
             filter_: Optional[str] = None,
             query: Optional[str] = None
     ) -> List[FilmShort]:
-        """Get films with query parameters. `sort` sorting by field."""                
+        """Get films with query parameters. 
+        `sort` - sorting by field.
+        `limit` - count of records per page
+        `page` - page number
+        `filter_` - filtered records by genre
+        `query` - qurey for search on next fields: actors_names, writers_names, 
+            title, description, genre
+        """                
         query = self.__make_query(sort, limit, page, filter_)        
         docs = await self.elastic.search(index='movies', body=query)        
         films_list = []        
