@@ -14,9 +14,17 @@ class InstanceSchema(BaseModel):
     name: str
 
 
+class FilmShort(BaseModel):
+    id: str
+    title: str
+    imdb_rating: Optional[float]
+    
+    class Config:
+        fields = {'field_value': 'fields'}
+
 class Film(BaseModel):
     id: str
-    imdb_rating: float
+    imdb_rating: Optional[float]
     genre: List[str]
     title: str
     description: Optional[str]
