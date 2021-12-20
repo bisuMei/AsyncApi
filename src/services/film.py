@@ -73,10 +73,7 @@ class FilmService:
             query_obj['query'] = {'match': {'genre': filter_}}
 
         if query:
-            query_obj['query'] = {'query':
-                {'multi_match':
-                    {'query': f'{query}',
-                    'fuzziness':'auto',
+            query_obj['query'] = {'multi_match':{'query': f'{query}','fuzziness':'auto',
                     'fields': [
                         'actors_names',
                         'writers_names',
@@ -84,12 +81,11 @@ class FilmService:
                         'description',
                         'genre'
                     ]}}
-            }
             
 
         query_obj['size'] = limit if limit else 10
         query_obj['from'] = int(page) * int(limit) - int(limit) if page else 1
-        
+        print(query_obj)
         return query_obj
 
     async def get_films_list(
@@ -105,11 +101,11 @@ class FilmService:
         `limit` - count of records per page
         `page` - page number
         `filter_` - filtered records by genre
-        `query` - qurey for search on next fields: actors_names, writers_names, 
+        `query` - query for search on next fields: actors_names, writers_names, 
             title, description, genre
         """                
-        query = self.__make_query(sort, limit, page, filter_)        
-        docs = await self.elastic.search(index='movies', body=query)        
+        query_ = self.__make_query(sort, limit, page, filter_, query)        
+        docs = await self.elastic.search(index='movies', body=query_)        
         films_list = []        
         for doc in docs['hits']['hits']:
             films_list.append(FilmShort(**doc['_source']))
