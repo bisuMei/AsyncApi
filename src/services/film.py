@@ -82,10 +82,9 @@ class FilmService:
                         'genre'
                     ]}}
             
-
         query_obj['size'] = limit if limit else 10
-        query_obj['from'] = int(page) * int(limit) - int(limit) if page else 1
-        print(query_obj)
+        query_obj['from'] = int(page) * int(query_obj['size']) - int(query_obj['size']) if page else 1
+        
         return query_obj
 
     async def get_films_list(
