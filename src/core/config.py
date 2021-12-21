@@ -20,7 +20,7 @@ REDIS_PORT = config('REDIS_PORT', cast=int)
 
 # Elasticsearch Settings
 ELASTIC_HOST = config('ELASTIC_HOST')
-ELASTIC_PORT = int(config('ELASTIC_PORT', cast=int))
+ELASTIC_PORT = config('ELASTIC_PORT', cast=int)
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
