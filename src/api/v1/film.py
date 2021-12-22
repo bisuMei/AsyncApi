@@ -1,8 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter
-from pydantic import BaseModel
 
-from models.film import Film, FilmShort
+from models.schemas import Film, FilmShort
 from services import film
 
 from db.redis import get_redis
@@ -21,8 +20,8 @@ async def film_details(film_id: str) -> Film:
     return film_
 
 
-@router.get('/',response_model=List[FilmShort])
-async def films(sort: Optional[str] = None, 
+@router.get('/', response_model=List[FilmShort])
+async def films(sort: Optional[str] = None,
                 limit: Optional[str] = None,
                 page: Optional[str] = None,
                 filter_: Optional[str] = None,

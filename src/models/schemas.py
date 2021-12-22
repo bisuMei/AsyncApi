@@ -22,6 +22,15 @@ class FilmShort(BaseModel):
     class Config:
         fields = {'field_value': 'fields'}
 
+
+class GenreShort(BaseModel):
+    id: str
+    name: str
+
+    class Config:
+        fields = {'field_value': 'fields'}
+
+
 class Film(BaseModel):
     id: str
     imdb_rating: Optional[float]
@@ -53,6 +62,7 @@ class Person(BaseModel):
     id: str
     full_name: str
     role: List[str]
+    film_ids: List[str]
 
     class Config:
         json_loads = orjson.loads
