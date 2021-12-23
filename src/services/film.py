@@ -9,7 +9,7 @@ from fastapi import Depends
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-from models.film import Film, FilmShort
+from models.schemas import Film, FilmShort
 
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 min
@@ -71,15 +71,15 @@ class FilmService:
         await self.redis.set(key, data, expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
     def __make_query(
-            self, 
-            sort: Optional[str] = None, 
-            limit: Optional[str] = None, 
-            page: Optional[str] = None, 
-            filter_: Optional[str] = None,
-            query: Optional[str] = None
-        ) -> dict:
+        self,
+        sort: Optional[str] = None,
+        limit: Optional[str] = None,
+        page: Optional[str] = None,
+        filter_: Optional[str] = None,
+        query: Optional[str] = None
+    ) -> dict:
         """Make query for ES from query parameters."""
-        query_obj = {'_source':[field for field in FilmShort.__fields__.keys()]}
+        query_obj = {'_source': [field for field in FilmShort.__fields__.keys()]}
 
         if sort:
             field = sort.split('-')  
@@ -90,7 +90,7 @@ class FilmService:
                 order = 'asc'
                 field = sort     
             field = 'title.raw' if field == 'title' else field            
-            query_obj['sort'] = [{field:{'order':order}}]
+            query_obj['sort'] = [{field: {'order': order}}]
         
         if filter_:
             query_obj['query'] = {'match': {'genre': filter_}}
@@ -116,17 +116,18 @@ class FilmService:
             limit: Optional[str] = None, 
             page: Optional[str] = None,
             filter_: Optional[str] = None,
-            query: Optional[str] = None
+            query: Optional[str] = None,
     ) -> List[FilmShort]:
         """Get films with query parameters. 
         `sort` - sorting by field.
         `limit` - count of records per page
         `page` - page number
         `filter_` - filtered records by genre
-        `query` - query for search on next fields: actors_names, writers_names, 
+        `query` - query for search on next fields: actors_names, writers_names,
             title, description, genre
         """                
         query_ = self.__make_query(sort, limit, page, filter_, query)
+
         params = {sort, f"{limit}_limit", f"{page}_page", filter_, query}
         key = '_'.join(param for param in params if param)
                       
