@@ -1,4 +1,6 @@
+import json
 from functools import lru_cache
+from posixpath import join
 from typing import List, Optional
 
 from aioredis import Redis
@@ -43,10 +45,31 @@ class FilmService:
         film = Film.parse_raw(data)
         return film
 
-    async def _put_film_to_cache(self, film: Film):
+    async def __films_list_from_cache(self, key: str) -> Optional[List[FilmShort]]:
+        """Try to get films_list by query string from cache."""            
+        films_list = await self.redis.get(key)        
+        if not films_list:
+            return None
+        
+        data = json.loads(films_list)
+        films_list = []
+        for film_short in data:
+            films_list.append(FilmShort.parse_raw(film_short))        
+        return films_list
+
+    async def _put_film_to_cache(self, film: Film) -> None:
         """Save film data. Life time - 5 min. Pydantic dataclass `film` sereilze to json"""
         await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
-    
+        
+    async def _put_films_list_to_cache(self, key: str, films_list: List[FilmShort]) -> None:
+        """Save films_list data. Key = query sting. Life time - 5 min."""
+        print(key)
+        data = []
+        for film_short in films_list:
+            data.append(film_short.json())
+        data = json.dumps(data)
+        await self.redis.set(key, data, expire=FILM_CACHE_EXPIRE_IN_SECONDS)
+
     def __make_query(
             self, 
             sort: Optional[str] = None, 
@@ -103,11 +126,19 @@ class FilmService:
         `query` - query for search on next fields: actors_names, writers_names, 
             title, description, genre
         """                
-        query_ = self.__make_query(sort, limit, page, filter_, query)        
-        docs = await self.elastic.search(index='movies', body=query_)        
-        films_list = []        
-        for doc in docs['hits']['hits']:
-            films_list.append(FilmShort(**doc['_source']))
+        query_ = self.__make_query(sort, limit, page, filter_, query)
+        params = {sort, f"{limit}_limit", f"{page}_page", filter_, query}
+        key = '_'.join(param for param in params if param)
+                      
+        films_list = await self.__films_list_from_cache(key)
+        if not films_list:
+            docs = await self.elastic.search(index='movies', body=query_)                          
+            films_list = []
+            for doc in docs['hits']['hits']:
+                films_list.append(FilmShort(**doc['_source']))
+        
+            if films_list:        
+                await self._put_films_list_to_cache(key, films_list)
         return films_list
 
 
