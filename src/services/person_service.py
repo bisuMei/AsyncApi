@@ -1,18 +1,15 @@
+import json
 from functools import lru_cache
 from typing import List, Optional
 
 from aioredis import Redis
+from elasticsearch import AsyncElasticsearch, exceptions
+from fastapi import Depends, HTTPException
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-
-from elasticsearch import AsyncElasticsearch, exceptions
-
-from fastapi import Depends, HTTPException
-
 from models.schemas import FilmShort, Person
-
-PERSON_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 min
+from services.redis_service import RedisService
 
 
 class PersonService:
@@ -37,22 +34,35 @@ class PersonService:
     def __init__(self, redis, elastic):
         self.redis = redis
         self.elastic = elastic
+        self._redis_service = RedisService(self.redis)
 
     async def get_by_id(self, person_id: str) -> Optional[Person]:
         """Return person info by id."""
-        person = await self._get_person_from_elastic(person_id)
+        person = await self._redis_service.get_model_from_cache(person_id, Person)
+        if not person:
+            person = await self._get_person_from_elastic(person_id)
+            if not person:
+                return None
+            await self._redis_service.put_model_to_cache(person)
         return person
-
+ 
     async def get_films_by_person(self, person_id: str) -> List[FilmShort]:
         """Return films by related person."""
         try:
             doc = await self.elastic.get('persons', person_id)
             film_ids = doc['_source']['film_ids']
             self.films_query['query']['ids']['values'] = film_ids
-            films_doc = await self.elastic.search(index='movies', body=self.films_query)
-            films_list = []
-            for doc in films_doc['hits']['hits']:
-                films_list.append(FilmShort(**doc['_source']))
+
+            key = f'films_by_person_{person_id}'
+            films_list = await self._redis_service.get_models_list_from_cache(key, FilmShort)
+            if not films_list:
+                films_doc = await self.elastic.search(index='movies', body=self.films_query)
+                films_list = []
+                for doc in films_doc['hits']['hits']:
+                    films_list.append(FilmShort(**doc['_source']))
+
+                if films_list:
+                    await self._redis_service.put_models_list_to_cache(key, films_list)
             return films_list
         except exceptions.NotFoundError:
             raise HTTPException(status_code=404, detail="Item not found")
@@ -65,8 +75,17 @@ class PersonService:
     ) -> List[Person]:
         """Return persons by query params."""
         query_ = self._make_search_query(limit, page, query)
-        persons_doc = await self.elastic.search(index='persons', body=query_)
-        return [Person(**doc['_source']) for doc in persons_doc['hits']['hits']]
+        params = {f"{limit}_limit", f"{page}_page", query}
+        key = 'persons_query_' + '_'.join(param for param in params if param)
+        
+        persons_list = await self._redis_service.get_models_list_from_cache(key, Person)
+        if not persons_list:
+            persons_doc = await self.elastic.search(index='persons', body=query_)
+            persons_list = [Person(**doc['_source']) for doc in persons_doc['hits']['hits']]
+
+            if persons_list:
+                await self._redis_service.put_models_list_to_cache(key, persons_list)
+        return persons_list
 
     def _make_search_query(
         self,
