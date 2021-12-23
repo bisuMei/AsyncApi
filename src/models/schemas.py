@@ -62,7 +62,7 @@ class Person(BaseModel):
     id: str
     full_name: str
     role: List[str]
-    film_ids: List[str]
+    film_ids: Optional[List[str]]
 
     class Config:
         json_loads = orjson.loads

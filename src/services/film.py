@@ -10,66 +10,31 @@ from fastapi import Depends
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.schemas import Film, FilmShort
-
-
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 min
+from services.redis_service import RedisService
 
 
 class FilmService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
-        self.elastic = elastic        
+        self.elastic = elastic    
+        self._redis_service = RedisService(self.redis)    
     
     async def get_by_id(self, film_id: str) -> Optional[Film]:
         """Return film object."""             
-        film = await self._film_from_cache(film_id)        
+        film = await self._redis_service.get_model_from_cache(film_id, Film)        
         if not film:            
             film = await self._get_film_from_elastic(film_id)
             if not film:                
                 return None
             # Save film to cache
-            await self._put_film_to_cache(film)
+            await self._redis_service.put_model_to_cache(film)
         return film
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
         """Get film from ES"""
         doc = await self.elastic.get('movies', film_id)                
         return Film(**doc['_source'])
-
-    async def _film_from_cache(self, film_id: str) -> Optional[Film]:
-        """Try to get film data from cache."""         
-        data = await self.redis.get(film_id)
-        if not data:
-            return None
-
-        film = Film.parse_raw(data)
-        return film
-
-    async def __films_list_from_cache(self, key: str) -> Optional[List[FilmShort]]:
-        """Try to get films_list by query string from cache."""            
-        films_list = await self.redis.get(key)        
-        if not films_list:
-            return None
-        
-        data = json.loads(films_list)
-        films_list = []
-        for film_short in data:
-            films_list.append(FilmShort.parse_raw(film_short))        
-        return films_list
-
-    async def _put_film_to_cache(self, film: Film) -> None:
-        """Save film data. Life time - 5 min. Pydantic dataclass `film` sereilze to json"""
-        await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
-        
-    async def _put_films_list_to_cache(self, key: str, films_list: List[FilmShort]) -> None:
-        """Save films_list data. Key = query sting. Life time - 5 min."""
-        print(key)
-        data = []
-        for film_short in films_list:
-            data.append(film_short.json())
-        data = json.dumps(data)
-        await self.redis.set(key, data, expire=FILM_CACHE_EXPIRE_IN_SECONDS)
-
+    
     def __make_query(
         self,
         sort: Optional[str] = None,
@@ -130,8 +95,8 @@ class FilmService:
 
         params = {sort, f"{limit}_limit", f"{page}_page", filter_, query}
         key = '_'.join(param for param in params if param)
-                      
-        films_list = await self.__films_list_from_cache(key)
+        
+        films_list = await self._redis_service.get_models_list_from_cache(key)
         if not films_list:
             docs = await self.elastic.search(index='movies', body=query_)                          
             films_list = []
@@ -139,7 +104,7 @@ class FilmService:
                 films_list.append(FilmShort(**doc['_source']))
         
             if films_list:        
-                await self._put_films_list_to_cache(key, films_list)
+                await self._redis_service.put_models_list_to_cache(key, films_list)
         return films_list
 
 
