@@ -12,7 +12,7 @@ services:
     expose:
       - "9200"
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - ${PWD}/elasticsearch-data:/usr/share/elasticsearch/data
     networks:
       - movie_proj    
   
@@ -27,7 +27,7 @@ services:
     command:
       - redis-server   
     volumes:
-      - redis-data:/data 
+      - ${PWD}/redis-data:/data
     networks:
       - movie_proj
 

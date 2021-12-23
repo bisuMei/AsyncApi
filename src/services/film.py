@@ -96,7 +96,7 @@ class FilmService:
         params = {sort, f"{limit}_limit", f"{page}_page", filter_, query}
         key = '_'.join(param for param in params if param)
         
-        films_list = await self._redis_service.get_models_list_from_cache(key)
+        films_list = await self._redis_service.get_models_list_from_cache(key, FilmShort)
         if not films_list:
             docs = await self.elastic.search(index='movies', body=query_)                          
             films_list = []

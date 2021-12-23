@@ -50,13 +50,15 @@ class PersonService:
         """Return films by related person."""
         try:
             doc = await self.elastic.get('persons', person_id)
-            film_ids = doc['_source']['film_ids']
+            film_ids = doc['_source']['film_ids']  
+            print(film_ids)          
             self.films_query['query']['ids']['values'] = film_ids
-
+            print(self.films_query)
             key = f'films_by_person_{person_id}'
             films_list = await self._redis_service.get_models_list_from_cache(key, FilmShort)
             if not films_list:
                 films_doc = await self.elastic.search(index='movies', body=self.films_query)
+                print(films_doc)
                 films_list = []
                 for doc in films_doc['hits']['hits']:
                     films_list.append(FilmShort(**doc['_source']))
