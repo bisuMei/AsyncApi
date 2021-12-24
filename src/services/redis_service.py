@@ -13,11 +13,11 @@ class RedisService:
         self.__redis = redis
         self.__expire = expire 
 
-    async def put_model_to_cache(self, model: Union[Film, Genre, Person]) -> None:
-        await self.__redis.set(model.id, model.json(), expire=self.__expire)
+    async def put_model_to_cache(self, key: str, model: Union[Film, Genre, Person]) -> None:
+        await self.__redis.set(key, model.json(), expire=self.__expire)
 
-    async def get_model_from_cache(self, id: str, model: Union[Film, Genre, Person]) -> Optional[Union[Film, Genre, Person]]:                 
-        data = await self.__redis.get(id)
+    async def get_model_from_cache(self, key: str, model: Union[Film, Genre, Person]) -> Optional[Union[Film, Genre, Person]]:                 
+        data = await self.__redis.get(key)
         if not data:
             return None
         return model.parse_raw(data)

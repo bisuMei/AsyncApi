@@ -2,65 +2,54 @@ version: "3.8"
 
 services:  
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
-    container_name: a_elasticsearch    
-    restart: always
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    container_name: a_elasticsearch        
     environment:
-      discovery.type: "single-node"
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1     
     ports:
       - 9200:9200
     expose:
       - "9200"
     volumes:
       - ${PWD}/elasticsearch-data:/usr/share/elasticsearch/data
-    networks:
-      - movie_proj    
   
   redis:
     image: redis:6.2.6
-    container_name: a_redis
-    restart: always      
-    ports:
-      - 6379:6379
+    container_name: a_redis        
     expose:
       - "6379"
     command:
       - redis-server   
     volumes:
       - ${PWD}/redis-data:/data
-    networks:
-      - movie_proj
 
   main:    
     container_name: a_main-app
     build: 
       context: .
-      dockerfile: dockerfile
-    networks:
-      - movie_proj
-    ports:
-      - 8000:8000
+      dockerfile: dockerfile-main 
+    env_file:
+      - .env
     depends_on:
       - elasticsearch
       - redis
-
-networks:
-  movie_proj:
-    external: true
-  default:
-
-volumes:
-  elasticsearch-data:
-    driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/elasticsearch-data
-      o: bind
-
-  redis-data:
-    driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/redis-data
-      o: bind
+  
+  nginx:
+    build: 
+      context: .
+      dockerfile: dockerfile-nginx    
+    volumes:
+      - ./nginx:/etc/nginx
+      - ./nginx/conf.d:/etc/nginx/conf.d            
+    depends_on:
+      - main
+    ports:
+      - "80:80"
   

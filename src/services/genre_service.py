@@ -21,12 +21,13 @@ class GenreService:
     
     async def get_by_id(self, genre_id: str) -> Optional[GenreShort]:
         """Get genre info by id."""
+        key = f"{GenreService.__name__}__genres_index__{genre_id}"
         genre = await self._redis_service.get_model_from_cache(genre_id, Genre)
         if not genre:
             genre = await self._get_genre_from_elastic(genre_id)
             if not genre:
-                return None
-            await self._redis_service.put_model_to_cache(genre)
+                return None            
+            await self._redis_service.put_model_to_cache(key, genre)
         return genre
 
     async def _get_genre_from_elastic(self, genre_id: str) -> Optional[GenreShort]:

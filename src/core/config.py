@@ -1,27 +1,24 @@
 import os
 from logging import config as logging_config
-from typing import cast
 
 from core.logger import LOGGING
-from decouple import config
 
 
 # Logger Settings
 logging_config.dictConfig(LOGGING)
 
 
-PROJECT_NAME = config('PROJECT_NAME')
+PROJECT_NAME = os.getenv('PROJECT_NAME', 'movies')
 
 
 # Redis Settings
-REDIS_HOST = config('REDIS_HOST')
-REDIS_PORT = config('REDIS_PORT', cast=int)
+REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
+REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 
 
 # Elasticsearch Settings
-ELASTIC_HOST = config('ELASTIC_HOST')
-ELASTIC_PORT = config('ELASTIC_PORT', cast=int)
+ELASTIC_HOST = os.getenv('ELASTIC_HOST', '127.0.0.1')
+ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
- 
