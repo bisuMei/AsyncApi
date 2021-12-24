@@ -6,6 +6,7 @@ from typing import List, Optional
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
+from pydantic.utils import path_type
 
 from db.elastic import get_elastic
 from db.redis import get_redis
@@ -20,14 +21,15 @@ class FilmService:
         self._redis_service = RedisService(self.redis)    
     
     async def get_by_id(self, film_id: str) -> Optional[Film]:
-        """Return film object."""             
+        """Return film object.""" 
+        key = f"{FilmService.__name__}__movies_index__{film_id}"             
         film = await self._redis_service.get_model_from_cache(film_id, Film)        
         if not film:            
             film = await self._get_film_from_elastic(film_id)
             if not film:                
                 return None
-            # Save film to cache
-            await self._redis_service.put_model_to_cache(film)
+            # Save film to cache                                   
+            await self._redis_service.put_model_to_cache(key, film)
         return film
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:

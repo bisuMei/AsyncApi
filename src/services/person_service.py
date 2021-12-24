@@ -38,12 +38,13 @@ class PersonService:
 
     async def get_by_id(self, person_id: str) -> Optional[Person]:
         """Return person info by id."""
-        person = await self._redis_service.get_model_from_cache(person_id, Person)
+        key = f"{PersonService.__name__}__persons_index__{person_id}"
+        person = await self._redis_service.get_model_from_cache(key, Person)
         if not person:
             person = await self._get_person_from_elastic(person_id)
             if not person:
-                return None
-            await self._redis_service.put_model_to_cache(person)
+                return None            
+            await self._redis_service.put_model_to_cache(key, person)
         return person
  
     async def get_films_by_person(self, person_id: str) -> List[FilmShort]:
