@@ -14,24 +14,29 @@ class InstanceSchema(BaseModel):
     name: str
 
 
-class FilmShort(BaseModel):
+class BaseFields(BaseModel):
+    class Config:
+        fields = {'field_value': 'fields'}
+
+
+class FilmShort(BaseFields):
     id: str
     title: str
     imdb_rating: Optional[float]
+
     
-    class Config:
-        fields = {'field_value': 'fields'}
-
-
-class GenreShort(BaseModel):
+class GenreShort(BaseFields):
     id: str
     name: str
 
-    class Config:
-        fields = {'field_value': 'fields'}
+
+class BaseOrjsonModel(BaseModel): 
+    class Config: 
+        json_loads = orjson.loads 
+        json_dumps = orjson_dumps
 
 
-class Film(BaseModel):
+class Film(BaseOrjsonModel):
     id: str
     imdb_rating: Optional[float]
     genre: List[str]
@@ -43,27 +48,16 @@ class Film(BaseModel):
     actors: List[InstanceSchema]
     writers: List[InstanceSchema]
 
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps
 
-
-class Genre(BaseModel):
+class Genre(BaseOrjsonModel):
     id: str
     name: str
     description: Optional[str]
 
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps
 
-
-class Person(BaseModel):
+class Person(BaseOrjsonModel):
     id: str
     full_name: str
     role: List[str]
     film_ids: Optional[List[str]]
 
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps
