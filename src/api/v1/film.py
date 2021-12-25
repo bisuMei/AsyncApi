@@ -21,12 +21,9 @@ router = APIRouter()
 )
 async def film_details(
     film_id: str,
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic)
-    ) -> Film:       
-    film_service = film.get_film_service(redis, elastic)     
-    film_ = await film_service.get_by_id(film_id)
-    return film_
+    film_service: film.FilmService = Depends(film.get_film_service)     
+    ) -> Film:           
+    return await film_service.get_by_id(film_id)
 
 
 @router.get(
@@ -40,15 +37,12 @@ async def film_details(
     response_description='Films list with id, title, imdb_rating'
 )
 async def films(
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic),
+    film_service: film.FilmService = Depends(film.get_film_service),
     sort: Optional[str] = None,
     limit: Optional[str] = None,
     page: Optional[str] = None,
     filter_: Optional[str] = None,
     query: Optional[str] = None
 ) -> List[FilmShort]: 
-    film_service = film.get_film_service(redis, elastic)     
-    film_list = await film_service.get_films_list(sort, limit, page, filter_, query)
-    return film_list
+    return await film_service.get_films_list(sort, limit, page, filter_, query)
 

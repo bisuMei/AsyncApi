@@ -7,7 +7,7 @@ from db.elastic import get_elastic, AsyncElasticsearch
 from db.redis import get_redis, Redis
 
 from models.schemas import FilmShort, Person
-from services.person_service import get_person_service
+from services.person_service import PersonService, get_person_service, Person
 
 
 router = APIRouter()
@@ -15,24 +15,18 @@ router = APIRouter()
 
 @router.get('/{person_id}', response_model=Person)
 async def person_details(
-    person_id: str,
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic)
+    person_id: str,    
+    person_service: PersonService = Depends(get_person_service)
 ) -> Person:
-    person_service = get_person_service(redis, elastic)
-    person_info = await person_service.get_by_id(person_id)
-    return person_info
+    return await person_service.get_by_id(person_id)
 
 
 @router.get('/{person_id}/film', response_model=List[FilmShort])
 async def films_by_person(
     person_id: str,
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic)
-) -> List[FilmShort]:
-    person_service = get_person_service(redis, elastic)
-    person_films_list = await person_service.get_films_by_person(person_id)
-    return person_films_list
+    person_service: PersonService = Depends(get_person_service)
+) -> List[FilmShort]:        
+    return await person_service.get_films_by_person(person_id)
 
 
 @router.get('/', response_model=List[Person])
@@ -40,9 +34,6 @@ async def persons(
         limit: Optional[str] = None,
         page: Optional[str] = None,
         query: Optional[str] = None,
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
-):
-    person_service = get_person_service(redis, elastic)
-    persons = await person_service.search_persons(limit, page, query)
-    return persons
+        person_service: PersonService = Depends(get_person_service)
+) -> List[Person]:        
+    return await person_service.search_persons(limit, page, query)
