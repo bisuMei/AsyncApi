@@ -1,0 +1,86 @@
+[
+  {
+    "id": "e4626af1-7fd5-414b-ba82-5555555555",
+    "imdb_rating": 7.5,
+    "genre": [
+      "Documentary"
+    ],
+    "title": "Jade: The Reality Star Who Changed Britain 25",
+    "description": "Series exploring the life of Jade Goody: the UK's most loved - and hated - reality TV star.",
+    "director": null,
+    "actors_names": [],
+    "writers_names": [],
+    "actors": [],
+    "writers": []
+  },
+  {
+    "id": "1b7d7c64-8be8-47db-8924-44444444",
+    "imdb_rating": 7.3,
+    "genre": [
+      "Adventure",
+      "Comedy",
+      "Sci-Fi"
+    ],
+    "title": "Star Trek 9",
+    "description": "The most acclaimed Star Trek adventure of all time with an important message.",
+    "director": "Leonard Nimoy",
+    "actors_names": [
+      "William Shatner",
+      "Leonard Nimoy",
+      "DeForest Kelley",
+      "James Doohan"
+    ],
+    "writers_names": [
+      "Peter Krikes",
+      "Steve Meerson",
+      "Nicholas Meyer",
+      "Gene Roddenberry",
+      "Leonard Nimoy",
+      "Harve Bennett"
+    ],
+    "actors": [
+      {
+        "id": "9758b894-57d7-465d-b657-c5803dd5b7f7",
+        "name": "William Shatner"
+      },
+      {
+        "id": "5a3d0299-2df2-4070-9fda-65ff4dfa863c",
+        "name": "Leonard Nimoy"
+      },
+      {
+        "id": "836bb95b-6db8-4418-a110-f41663b1c025",
+        "name": "DeForest Kelley"
+      },
+      {
+        "id": "807ce9c3-6294-485c-803a-1975066f239f",
+        "name": "James Doohan"
+      }
+    ],
+    "writers": [
+      {
+        "id": "7caea3e2-194c-4876-be8f-60b1a4743d21",
+        "name": "Peter Krikes"
+      },
+      {
+        "id": "74b4cc18-9fb3-4796-b718-2d0fa4f84fb4",
+        "name": "Steve Meerson"
+      },
+      {
+        "id": "c883c2c6-d7a4-4001-8084-e2851904e91a",
+        "name": "Nicholas Meyer"
+      },
+      {
+        "id": "6960e2ca-889f-41f5-b728-1e7313e54d6c",
+        "name": "Gene Roddenberry"
+      },
+      {
+        "id": "5a3d0299-2df2-4070-9fda-65ff4dfa863c",
+        "name": "Leonard Nimoy"
+      },
+      {
+        "id": "58411ec0-c40a-43da-95e3-0adc74b7e7f6",
+        "name": "Harve Bennett"
+      }
+    ]
+  }
+]
