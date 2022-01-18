@@ -1,7 +1,7 @@
 import json
 from typing import Optional, List, Union
 
-from models.schemas import Film, FilmShort, Genre, GenreShort, Person, GenreShort
+from models.schemas import Film, FilmShort, Genre, Person
 
 
 CACHE_EXPIRE_IN_SECONDS = 60 * 5 # 5 min by default

@@ -3,9 +3,6 @@ from typing import List, Optional
 from fastapi import APIRouter
 from fastapi.param_functions import Depends
 
-from db.elastic import get_elastic, AsyncElasticsearch
-from db.redis import get_redis, Redis
-
 from models.schemas import GenreShort
 from services.genre_service import get_genre_service, GenreService
 

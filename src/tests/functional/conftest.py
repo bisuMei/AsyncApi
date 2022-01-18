@@ -1,3 +1,5 @@
+import asyncio
+
 import aiohttp
 import pytest
 import os
@@ -6,7 +8,7 @@ import orjson
 from dataclasses import dataclass
 from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
-from tests.functional import settings
+from core import config
 
 SERVICE_URL = 'http://127.0.0.1:8000'
 
@@ -16,6 +18,13 @@ class HTTPResponse:
     body: dict
     headers: CIMultiDictProxy[str]
     status: int
+
+
+@pytest.fixture(scope="session", autouse=True)
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope='session')
@@ -50,7 +59,7 @@ def make_get_request(session):
 @pytest.fixture
 def load_test_data():
     def load_data(filename: str):
-        with open(os.path.join(settings.BASE_DIR, 'functional', 'testdata', filename)) as file:
+        with open(os.path.join(config.BASE_DIR, 'tests', 'functional', 'testdata', filename)) as file:
             return orjson.loads(file.read())
     return load_data
 

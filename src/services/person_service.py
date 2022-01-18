@@ -1,4 +1,3 @@
-import json
 from functools import lru_cache
 from typing import List, Optional
 
@@ -10,31 +9,17 @@ from db.elastic import get_elastic
 from db.redis import get_redis
 from models.schemas import FilmShort, Person
 from services.redis_service import RedisService
+from services.elastic_service import ElasticSearchService
+from core import config
 
 
 class PersonService:
-    person_query = {
-            "match": {
-                "full_name": {
-                    "query": "{name}",
-                    "fuzziness": "AUTO"
-                }
-            }
-        }
-
-    films_query = {
-        '_source': ['id', 'title', 'imdb_rating'],
-        'query': {
-            'ids': {
-                'values': []
-            }
-        }
-    }
 
     def __init__(self, redis, elastic):
         self.redis = redis
         self.elastic = elastic
         self._redis_service = RedisService(self.redis)
+        self.elastic_service = ElasticSearchService(self.elastic)
 
     async def get_by_id(self, person_id: str) -> Optional[Person]:
         """Return person info by id."""
@@ -50,15 +35,16 @@ class PersonService:
     async def get_films_by_person(self, person_id: str) -> List[FilmShort]:
         """Return films by related person."""
         try:
-            doc = await self.elastic.get('persons', person_id)
-            film_ids = doc['_source']['film_ids']              
-            self.films_query['query']['ids']['values'] = film_ids            
+            doc = await self.elastic_service.get(config.ELASTIC_INDEX['persons'], person_id)
+
+            film_ids = doc['_source']['film_ids']
+            films_query = self.elastic_service.films_query
+            films_query['query']['ids']['values'] = film_ids
+
             key = f'films_by_person_{person_id}'
             films_list = await self._redis_service.get_models_list_from_cache(key, FilmShort)
             if not films_list:
-                print('-'*100)
-                print(self.films_query)
-                films_doc = await self.elastic.search(index='movies', body=self.films_query)                
+                films_doc = await self.elastic_service.search(config.ELASTIC_INDEX['movies'], films_query)
                 films_list = []
                 for doc in films_doc['hits']['hits']:
                     films_list.append(FilmShort(**doc['_source']))
@@ -82,7 +68,7 @@ class PersonService:
         
         persons_list = await self._redis_service.get_models_list_from_cache(key, Person)
         if not persons_list:
-            persons_doc = await self.elastic.search(index='persons', body=query_)
+            persons_doc = await self.elastic_service.search(config.ELASTIC_INDEX['persons'], query_)
             persons_list = [Person(**doc['_source']) for doc in persons_doc['hits']['hits']]
 
             if persons_list:
@@ -97,16 +83,17 @@ class PersonService:
     ) -> dict:
         query_obj = {'_source': [field for field in Person.__fields__.keys()]}
         if query:
-            self.person_query['match']['full_name']['query'] = query
-            query_obj['query'] = self.person_query
+            person_query = self.elastic_service.person_query
+            person_query['match']['full_name']['query'] = query
+            query_obj['query'] = person_query
         query_obj['size'] = limit if limit else 10
-        query_obj['from'] = int(page) * int(query_obj['size']) - int(query_obj['size']) if page else 1
+        query_obj['from'] = int(page) * int(query_obj['size']) - int(query_obj['size']) if page else 0
 
         return query_obj
 
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
         try:
-            doc = await self.elastic.get('persons', person_id)
+            doc = await self.elastic_service.get(config.ELASTIC_INDEX['persons'], person_id)
             return Person(**doc['_source'])
         except exceptions.NotFoundError:
             raise HTTPException(status_code=404, detail="Item not found")
