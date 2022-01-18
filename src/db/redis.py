@@ -6,4 +6,4 @@ redis: Optional[Redis] = None
 
 
 async def get_redis() -> Redis:
-    return redis 
+    return redis

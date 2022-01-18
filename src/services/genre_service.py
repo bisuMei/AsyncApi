@@ -1,4 +1,3 @@
-import json
 from functools import lru_cache
 from typing import List, Optional
 
@@ -10,6 +9,8 @@ from db.elastic import get_elastic
 from db.redis import get_redis
 from models.schemas import Genre, GenreShort
 from services.redis_service import RedisService
+from services.elastic_service import ElasticSearchService
+from core import config
 
 
 class GenreService:
@@ -17,7 +18,8 @@ class GenreService:
     def __init__(self, redis, elastic):
         self.redis = redis
         self.elastic = elastic
-        self._redis_service = RedisService(self.redis)    
+        self._redis_service = RedisService(self.redis)
+        self.elastic_service = ElasticSearchService(self.elastic)
     
     async def get_by_id(self, genre_id: str) -> Optional[GenreShort]:
         """Get genre info by id."""
@@ -32,7 +34,7 @@ class GenreService:
 
     async def _get_genre_from_elastic(self, genre_id: str) -> Optional[GenreShort]:
         try:
-            doc = await self.elastic.get('genres', genre_id)
+            doc = await self.elastic_service.get(config.ELASTIC_INDEX['genres'], genre_id)
             return GenreShort(**doc['_source'])
         except exceptions.NotFoundError:
             raise HTTPException(status_code=404, detail="Item not found")
@@ -41,7 +43,7 @@ class GenreService:
         """Get list of genres. """
         genres_list = await self._redis_service.get_models_list_from_cache('genre', Genre)
         if not genres_list:
-            docs = await self.elastic.search(index='genres')
+            docs = await self.elastic_service.search(config.ELASTIC_INDEX['genres'])
             genres_list = [GenreShort(**doc['_source']) for doc in docs['hits']['hits']]
 
             if genres_list:

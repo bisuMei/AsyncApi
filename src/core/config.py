@@ -19,6 +19,6 @@ REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 # Elasticsearch Settings
 ELASTIC_HOST = os.getenv('ELASTIC_HOST', '127.0.0.1')
 ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
-
+ELASTIC_INDEX = os.getenv('ELASTIC_INDEX', {'movies': 'movies', 'persons': 'persons', 'genres': 'genres'})
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

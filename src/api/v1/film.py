@@ -5,10 +5,6 @@ from fastapi.param_functions import Depends
 from models.schemas import Film, FilmShort
 from services import film
 
-from db.elastic import get_elastic, AsyncElasticsearch
-from db.redis import get_redis, Redis
-
-
 router = APIRouter()
 
 
