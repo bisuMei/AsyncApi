@@ -9,7 +9,7 @@ from db.elastic import get_elastic
 from db.redis import get_redis
 from models.schemas import Film, FilmShort
 from services.redis_service import RedisService
-from services.elastic_service import ElasticSearchService
+from services.elastic_service import ElasticSearchService, QueryParameters
 from core import config
 
 
@@ -37,49 +37,6 @@ class FilmService:
         doc = await self.elastic_service.get(config.ELASTIC_INDEX['movies'], film_id)
         return Film(**doc['_source'])
 
-    def __make_query(
-        self,
-        sort: Optional[str] = None,
-        limit: Optional[str] = None,
-        page: Optional[str] = None,
-        filter_: Optional[str] = None,
-        query: Optional[str] = None
-    ) -> dict:
-        """Make query for ES from query parameters."""
-        query_obj = {'_source': [field for field in FilmShort.__fields__.keys()]}
-
-        if sort:
-            if '-' in sort:
-                order = 'desc'
-                field = sort.split('-')[-1]
-            else:
-                order = 'asc'
-                field = sort
-            field = 'title.raw' if field == 'title' else field
-            query_obj['sort'] = [{field: {'order': order}}]
-
-        if filter_:
-            query_obj['query'] = {'match': {'genre': filter_}}
-
-        if query:
-            query_obj['query'] = {
-                'multi_match': {
-                    'query': f'{query}', 'fuzziness': 'auto',
-                    'fields': [
-                        'actors_names',
-                        'writers_names',
-                        'title',
-                        'description',
-                        'genre'
-                    ]
-                }
-            }
-
-        query_obj['size'] = limit if limit else 10
-        query_obj['from'] = int(page) * int(query_obj['size']) - int(query_obj['size']) if page else 0
-
-        return query_obj
-
     async def get_films_list(
             self,
             sort: Optional[str] = None,
@@ -96,13 +53,23 @@ class FilmService:
         `query` - query for search on next fields: actors_names, writers_names,
             title, description, genre
         """
-        query_ = self.__make_query(sort, limit, page, filter_, query)
-
+        query_obj = {'_source': [field for field in FilmShort.__fields__.keys()]}
+        
+        query_ = await self.elastic_service.make_query(
+            query_obj=query_obj, 
+            query_params=QueryParameters(
+                sort=sort, 
+                limit=limit, 
+                page=page, 
+                filter_=filter_, 
+                query=query
+        ))
+        
         params = {sort, f"{limit}_limit", f"{page}_page", filter_, query}
         key = '_'.join(param for param in params if param)
 
         films_list = await self._redis_service.get_models_list_from_cache(key, FilmShort)
-        if not films_list:
+        if not films_list:            
             docs = await self.elastic_service.search(config.ELASTIC_INDEX['movies'], query_)
             films_list = []
             for doc in docs['hits']['hits']:

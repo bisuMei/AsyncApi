@@ -27,8 +27,9 @@ async def film_details(
     response_model=List[FilmShort],
     summary='Films list',
     description='Films list with id, title, imdb_rating. \
-        Can be sorted by `imdb_ragin` and `title`. Pagination available. \
-        `limit` - number of films per `page`. Can by filtered by ganre. \
+        Can be sorted by `imdb_rating` and `title`. Pagination available. \
+        `limit` - number of films per `page` (10 by default). \
+        `filter_` - Can by filtered by ganre. \
         `query` - for serach by fields: actors_names, writers_names, title, description, genre',
     response_description='Films list with id, title, imdb_rating'
 )

@@ -1,4 +1,16 @@
+from typing import Optional
+
 from elasticsearch import AsyncElasticsearch
+from pydantic import BaseModel
+
+
+class QueryParameters(BaseModel):
+    """Model for query parameters."""
+    sort: Optional[str] = None
+    limit: Optional[str] = None
+    page: Optional[str] = None
+    filter_: Optional[str] = None
+    query: Optional[str] = None
 
 
 class ElasticSearchService:
@@ -32,3 +44,41 @@ class ElasticSearchService:
     async def search(self, index: str, query: dict = None):
         doc = await self.es.search(index=index, body=query)
         return doc
+ 
+    async def make_query(
+        self,
+        query_obj: dict,
+        query_params: QueryParameters
+    ) -> dict:
+        """Make query for ES from query parameters."""              
+        if query_params.sort:
+            if '-' in query_params.sort:
+                order = 'desc'
+                field = query_params.sort.split('-')[-1]
+            else:
+                order = 'asc'
+                field = query_params.sort
+            field = 'title.raw' if field == 'title' else field
+            query_obj['sort'] = [{field: {'order': order}}]
+
+        if query_params.filter_:
+            query_obj['query'] = {'match': {'genre': query_params.filter_}}
+
+        if query_params.query:
+            query_obj['query'] = {
+                'multi_match': {
+                    'query': f'{query_params.query}', 'fuzziness': 'auto',
+                    'fields': [
+                        'actors_names',
+                        'writers_names',
+                        'title',
+                        'description',
+                        'genre'
+                    ]
+                }
+            }
+
+        query_obj['size'] = query_params.limit if query_params.limit else 10
+        query_obj['from'] = int(query_params.page) * int(query_obj['size']) - int(query_obj['size']) if query_params.page else 0
+
+        return query_obj
