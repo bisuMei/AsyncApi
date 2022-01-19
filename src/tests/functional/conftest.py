@@ -1,5 +1,4 @@
 import asyncio
-
 import aiohttp
 import pytest
 import os
@@ -65,15 +64,10 @@ def load_test_data():
 
 
 @pytest.fixture
-def api_films_list_v1_url():
+def api_films_v1_url():
     return '/api/v1/film/'
 
 
 @pytest.fixture
-def api_film_v1_url():
+def api_film_by_id_v1_url():
     return '/api/v1/film/{film_id}'
-
-
-@pytest.fixture
-def film_id():
-    return "e4626af1-7fd5-414b-ba82-5555555555"
