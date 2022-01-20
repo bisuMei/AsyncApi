@@ -1,3 +1,3 @@
-import os
+"""Test settings."""
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SERVICE_URL = 'http://127.0.0.1:8000'

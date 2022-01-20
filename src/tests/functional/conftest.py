@@ -7,9 +7,8 @@ import orjson
 from dataclasses import dataclass
 from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
-from core import config
-
-SERVICE_URL = 'http://127.0.0.1:8000'
+from src.core import config
+from src.tests.functional.settings import SERVICE_URL
 
 
 @dataclass

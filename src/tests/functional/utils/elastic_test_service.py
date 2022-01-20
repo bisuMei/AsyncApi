@@ -19,7 +19,7 @@ class ElasticTestService:
         created = False
 
         try:
-            if not self.es.indices.exists(index=index_name):
+            if not await self.es.indices.exists(index=index_name):
                 # Ignore 400 means to ignore "Index Already Exist" error.
                 await self.es.indices.create(index=index_name, ignore=400, body=index_settings)
                 logger.info('Index created')
