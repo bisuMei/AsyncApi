@@ -2,8 +2,8 @@ from functools import lru_cache
 from typing import List, Optional
 
 from aioredis import Redis
-from elasticsearch import AsyncElasticsearch
-from fastapi import Depends
+from elasticsearch import AsyncElasticsearch, exceptions
+from fastapi import Depends, HTTPException
 
 from db.elastic import get_elastic
 from db.redis import get_redis
@@ -34,8 +34,11 @@ class FilmService:
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Film]:
         """Get film from ES"""
-        doc = await self.elastic_service.get(config.ELASTIC_INDEX['movies'], film_id)
-        return Film(**doc['_source'])
+        try:
+            doc = await self.elastic_service.get(config.ELASTIC_INDEX['movies'], film_id)
+            return Film(**doc['_source'])
+        except exceptions.NotFoundError:
+            raise HTTPException(status_code=404, detail="Item not found")
 
     async def get_films_list(
             self,
