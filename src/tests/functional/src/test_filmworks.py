@@ -1,10 +1,11 @@
 import pytest
+import asyncio
 
-from core import config
+from src.core import config
 from fastapi import status
 
-from tests.functional.utils.elastic_test_service import ElasticTestService
-from tests.functional.utils.elastic_test_schemas import filmworks_index_schema
+from src.tests.functional.utils.elastic_test_service import ElasticTestService
+from src.tests.functional.utils.elastic_test_schemas import filmworks_index_schema
 
 
 @pytest.fixture
@@ -61,7 +62,10 @@ async def test_get_list_of_films(
     es_client,
     load_test_films_to_es,
 ):
+    await asyncio.sleep(1)
+
     response = await make_get_request(api_films_v1_url)
+
     assert response.status == status.HTTP_200_OK
     assert response.body == expected_films_list
 
@@ -87,6 +91,8 @@ async def test_get_film_by_id_404_response(
     api_film_by_id_v1_url,
     prepare_service,
 ):
+    await asyncio.sleep(1)
+
     invalid_ids = [111, '123', '---', '+123', '}']
     for invalid_id in invalid_ids:
         url = api_film_by_id_v1_url.format(film_id=invalid_id)
@@ -103,6 +109,8 @@ async def test_film_filter_by_genre(
     expected_film_by_genre,
     genre_name,
 ):
+    await asyncio.sleep(1)
+
     response = await make_get_request(api_films_v1_url, params={'filter_': genre_name})
     assert response.status == status.HTTP_200_OK
     assert response.body == expected_film_by_genre
@@ -115,6 +123,8 @@ async def test_film_search_query(
     api_films_v1_url,
     expected_film_by_query,
 ):
+    await asyncio.sleep(1)
+
     response = await make_get_request(api_films_v1_url, params={'query': 'Leonard'})
     assert response.status == status.HTTP_200_OK
     assert response.body == expected_film_by_query
