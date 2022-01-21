@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    container_name: elasticsearch_test        
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1         
+    expose:
+      - "9200"
+    ports:
+      - 9200:9200
+    volumes:
+      - ${PWD}/../../../elasticsearch-data:/usr/share/elasticsearch/data
+  
+  redis:
+    image: redis:6.2.6
+    container_name: redis_test
+    expose:
+      - "6379"
+    ports:
+      - 6379:6379
+    command:
+      - redis-server   
+    volumes:
+      - ${PWD}/../../../redis-data:/data
+
+  main:    
+    container_name: main_test
+    build: ../../.
+    image: asyncapi_main  
+    env_file:
+      - .env
+    ports:
+      - 8000:8000      
+    depends_on:
+      - elasticsearch
+      - redis
+
+  tests:    
+    container_name: tests
+    build: 
+      context: .
+      dockerfile: dockerfile-test   
+    entrypoint: >
+      sh -c "pip install -r /tests/functional/requirements.txt
+      && python3 /tests/functional/utils/wait_for_es.py
+      && python3 /tests/functional/utils/wait_for_redis.py
+      && pytest /tests/functional/src"  
+    env_file:
+      - .env
+    depends_on:
+      - main

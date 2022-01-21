@@ -1,7 +1,7 @@
 import os
 from logging import config as logging_config
 
-from src.core.logger import LOGGING
+from core.logger import LOGGING
 
 
 # Logger Settings

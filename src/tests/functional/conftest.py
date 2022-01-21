@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
 from src.core import config
-from src.tests.functional.settings import SERVICE_URL
+from src.tests.functional.settings import SERVICE_URL, ELASTIC_URL
 
 
 @dataclass
@@ -27,7 +27,7 @@ def event_loop():
 
 @pytest.fixture(scope='session')
 async def es_client():
-    client = AsyncElasticsearch(hosts='127.0.0.1:9200')
+    client = AsyncElasticsearch(hosts=ELASTIC_URL)
     yield client
     await client.close()
 
