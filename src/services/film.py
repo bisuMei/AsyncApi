@@ -10,7 +10,7 @@ from db.redis import get_redis
 from models.schemas import Film, FilmShort
 from services.redis_service import RedisService
 from services.elastic_service import ElasticSearchService, QueryParameters
-from core import config
+from core.config import config
 
 
 class FilmService:

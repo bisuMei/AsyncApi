@@ -2,7 +2,7 @@ import aioredis
 import uvicorn
 
 from api.v1 import film, genre, person
-from core import config
+from core.config import config
 from db import elastic, redis
 
 from elasticsearch import AsyncElasticsearch
