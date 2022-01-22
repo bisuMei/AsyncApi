@@ -1,5 +1,7 @@
 FROM python:3.9
 
+ENV PYTHONUNBUFFERED 1
+
 WORKDIR /code
 
 COPY ./src/requirements.txt /code/requirements.txt
@@ -8,4 +10,6 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 COPY ./src /code
 
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "main:app"]
+ENV PYTHONPATH "${PYTHONPATH}:/code"
+
+# CMD ["gunicorn", "-b", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "main:app"]
