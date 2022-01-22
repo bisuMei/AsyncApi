@@ -1,14 +1,17 @@
 import asyncio
 import aiohttp
+import aioredis
 import pytest
 import os
 import orjson
 
 from dataclasses import dataclass
+
+from aioredis import Redis
 from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
-from src.core import config
-from src.tests.functional.settings import SERVICE_URL
+from src.tests.functional.settings import BASE_DIR
+from src.tests.functional.settings import config
 
 
 @dataclass
@@ -25,9 +28,18 @@ def event_loop():
     loop.close()
 
 
+@pytest.fixture()
+async def clear_redis_cache():
+    pool = aioredis.ConnectionsPool((config.REDIS_HOST, config.REDIS_PORT), minsize=10, maxsize=20)
+    redis = Redis(pool)
+    await redis.flushall()
+    yield
+    redis.close()
+
+
 @pytest.fixture(scope='session')
 async def es_client():
-    client = AsyncElasticsearch(hosts='127.0.0.1:9200')
+    client = AsyncElasticsearch(hosts=f'{config.ELASTIC_HOST}:{config.ELASTIC_PORT}')
     yield client
     await client.close()
 
@@ -43,7 +55,7 @@ async def session():
 def make_get_request(session):
     async def inner(method: str, params: dict = None) -> HTTPResponse:
         params = params or {}
-        url = SERVICE_URL + method
+        url = f'http://{config.SERVICE_HOST}:{config.SERVICE_PORT}' + method
         async with session.get(url, params=params) as response:
             return HTTPResponse(
                 body=await response.json(),
@@ -57,7 +69,7 @@ def make_get_request(session):
 @pytest.fixture
 def load_test_data():
     def load_data(filename: str):
-        with open(os.path.join(config.BASE_DIR, 'tests', 'functional', 'testdata', filename)) as file:
+        with open(os.path.join(BASE_DIR, 'functional', 'testdata', filename)) as file:
             return orjson.loads(file.read())
     return load_data
 

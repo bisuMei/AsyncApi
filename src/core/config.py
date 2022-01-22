@@ -1,24 +1,29 @@
 import os
+from environs import Env
 from logging import config as logging_config
+
+from pydantic import BaseSettings
 
 from src.core.logger import LOGGING
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+Env.read_env()
 
 # Logger Settings
 logging_config.dictConfig(LOGGING)
 
 
-PROJECT_NAME = os.getenv('PROJECT_NAME', 'movies')
+class Config(BaseSettings):
+    """Base settings"""
+
+    PROJECT_NAME: str
+
+    ELASTIC_HOST: str
+    ELASTIC_PORT: int
+    ELASTIC_INDEX: dict
+
+    REDIS_HOST: str
+    REDIS_PORT: int
 
 
-# Redis Settings
-REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
-
-
-# Elasticsearch Settings
-ELASTIC_HOST = os.getenv('ELASTIC_HOST', '127.0.0.1')
-ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
-ELASTIC_INDEX = os.getenv('ELASTIC_INDEX', {'movies': 'movies', 'persons': 'persons', 'genres': 'genres'})
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+config = Config()

@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 
-from src.core import config
+from src.tests.functional.settings import config
 from fastapi import status
 
 from src.tests.functional.utils.elastic_test_service import ElasticTestService
@@ -60,7 +60,7 @@ async def test_get_list_of_films(
     api_films_v1_url,
     expected_films_list,
     es_client,
-    load_test_films_to_es,
+    clear_redis_cache,
 ):
     await asyncio.sleep(1)
 
@@ -77,6 +77,7 @@ async def test_get_film_by_id(
     api_film_by_id_v1_url,
     film_id,
     expected_film_detail,
+    clear_redis_cache,
 ):
     url = api_film_by_id_v1_url.format(film_id=film_id)
     response = await make_get_request(url)
@@ -90,6 +91,7 @@ async def test_get_film_by_id_404_response(
     make_get_request,
     api_film_by_id_v1_url,
     prepare_service,
+    clear_redis_cache,
 ):
     await asyncio.sleep(1)
 
@@ -108,6 +110,7 @@ async def test_film_filter_by_genre(
     api_films_v1_url,
     expected_film_by_genre,
     genre_name,
+    clear_redis_cache,
 ):
     await asyncio.sleep(1)
 
@@ -122,6 +125,7 @@ async def test_film_search_query(
     make_get_request,
     api_films_v1_url,
     expected_film_by_query,
+    clear_redis_cache,
 ):
     await asyncio.sleep(1)
 
