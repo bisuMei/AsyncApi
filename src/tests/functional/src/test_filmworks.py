@@ -1,11 +1,7 @@
 import pytest
 import asyncio
 
-from src.tests.functional.settings import config
 from fastapi import status
-
-from src.tests.functional.utils.elastic_test_service import ElasticTestService
-from src.tests.functional.utils.elastic_test_schemas import filmworks_index_schema
 
 
 @pytest.fixture
@@ -38,28 +34,12 @@ def expected_film_by_query(load_test_data):
     return load_test_data('film_by_query.json')
 
 
-@pytest.fixture
-def load_test_films_to_es(load_test_data):
-    return load_test_data('films_loads_to_es.json')
-
-
-@pytest.fixture
-async def prepare_service(es_client, load_test_films_to_es):
-    """Create test index for tests and delete index after."""
-    es_service = ElasticTestService(es_client)
-    await es_service.create_index(config.ELASTIC_INDEX['movies'], filmworks_index_schema)
-    await es_service.bulk_store(config.ELASTIC_INDEX['movies'], load_test_films_to_es)
-    yield
-    await es_service.delete_index(config.ELASTIC_INDEX['movies'])
-
-
 @pytest.mark.asyncio
 async def test_get_list_of_films(
-    prepare_service,
+    prepare_film_service,
     make_get_request,
     api_films_v1_url,
     expected_films_list,
-    es_client,
     clear_redis_cache,
 ):
     await asyncio.sleep(1)
@@ -72,7 +52,7 @@ async def test_get_list_of_films(
 
 @pytest.mark.asyncio
 async def test_get_film_by_id(
-    prepare_service,
+    prepare_film_service,
     make_get_request,
     api_film_by_id_v1_url,
     film_id,
@@ -90,7 +70,7 @@ async def test_get_film_by_id(
 async def test_get_film_by_id_404_response(
     make_get_request,
     api_film_by_id_v1_url,
-    prepare_service,
+    prepare_film_service,
     clear_redis_cache,
 ):
     await asyncio.sleep(1)
@@ -105,7 +85,7 @@ async def test_get_film_by_id_404_response(
 
 @pytest.mark.asyncio
 async def test_film_filter_by_genre(
-    prepare_service,
+    prepare_film_service,
     make_get_request,
     api_films_v1_url,
     expected_film_by_genre,
@@ -121,7 +101,7 @@ async def test_film_filter_by_genre(
 
 @pytest.mark.asyncio
 async def test_film_search_query(
-    prepare_service,
+    prepare_film_service,
     make_get_request,
     api_films_v1_url,
     expected_film_by_query,
@@ -132,3 +112,5 @@ async def test_film_search_query(
     response = await make_get_request(api_films_v1_url, params={'query': 'Leonard'})
     assert response.status == status.HTTP_200_OK
     assert response.body == expected_film_by_query
+    print(response.body)
+    print(expected_film_by_query)
