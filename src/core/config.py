@@ -4,7 +4,7 @@ from logging import config as logging_config
 
 from pydantic import BaseSettings
 
-from src.core.logger import LOGGING
+from core.logger import LOGGING
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 Env.read_env()

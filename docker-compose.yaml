@@ -13,7 +13,7 @@ services:
       memlock:
         soft: -1
         hard: -1         
-    expose:
+    expose:  
       - "9200"
     volumes:
       - ${PWD}/elasticsearch-data:/usr/share/elasticsearch/data
@@ -32,7 +32,8 @@ services:
     container_name: a_main-app
     build: 
       context: .
-      dockerfile: dockerfile-main 
+      dockerfile: dockerfile-main   
+    command: "gunicorn -b 0.0.0.0:8000 --workers 4 --worker-class uvicorn.workers.UvicornWorker main:app"      
     env_file:
       - .env
     depends_on:
@@ -42,7 +43,7 @@ services:
   nginx:
     build: 
       context: .
-      dockerfile: dockerfile-nginx    
+      dockerfile: dockerfile-nginx        
     volumes:
       - ./nginx:/etc/nginx
       - ./nginx/conf.d:/etc/nginx/conf.d            
@@ -50,4 +51,5 @@ services:
       - main
     ports:
       - "80:80"
+  
   

@@ -1,11 +1,11 @@
 import pytest
 import asyncio
 
-from src.tests.functional.settings import config
+from tests.functional.settings import config
 from fastapi import status
 
-from src.tests.functional.utils.elastic_test_service import ElasticTestService
-from src.tests.functional.utils.elastic_test_schemas import filmworks_index_schema
+from tests.functional.utils.elastic_test_service import ElasticTestService
+from tests.functional.utils.elastic_test_schemas import filmworks_index_schema
 
 
 @pytest.fixture
