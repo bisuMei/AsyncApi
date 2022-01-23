@@ -1,7 +1,6 @@
 import pytest
 import asyncio
 
-from tests.functional.settings import config
 from fastapi import status
 
 
@@ -42,11 +41,10 @@ def load_test_films_to_es(load_test_data):
 
 @pytest.mark.asyncio
 async def test_get_list_of_films(
-    prepare_service,
+    prepare_film_service,
     make_get_request,
     api_films_v1_url,
     expected_films_list,
-    es_client,
     clear_redis_cache,
 ):
     await asyncio.sleep(1)
@@ -59,7 +57,7 @@ async def test_get_list_of_films(
 
 @pytest.mark.asyncio
 async def test_get_film_by_id(
-    prepare_service,
+    prepare_film_service,
     make_get_request,
     api_film_by_id_v1_url,
     film_id,
@@ -77,7 +75,7 @@ async def test_get_film_by_id(
 async def test_get_film_by_id_404_response(
     make_get_request,
     api_film_by_id_v1_url,
-    prepare_service,
+    prepare_film_service,
     clear_redis_cache,
 ):
     await asyncio.sleep(1)
@@ -92,7 +90,7 @@ async def test_get_film_by_id_404_response(
 
 @pytest.mark.asyncio
 async def test_film_filter_by_genre(
-    prepare_service,
+    prepare_film_service,
     make_get_request,
     api_films_v1_url,
     expected_film_by_genre,
@@ -108,7 +106,7 @@ async def test_film_filter_by_genre(
 
 @pytest.mark.asyncio
 async def test_film_search_query(
-    prepare_service,
+    prepare_film_service,
     make_get_request,
     api_films_v1_url,
     expected_film_by_query,
