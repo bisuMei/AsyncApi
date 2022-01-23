@@ -4,26 +4,6 @@ import pytest
 from fastapi import status
 
 
-@pytest.fixture
-def load_test_genres_to_es(load_test_data):
-    return load_test_data('genres_loads_to_es.json')
-
-
-@pytest.fixture
-def expected_genres_list(load_test_data):
-    return load_test_data('genres_list.json')
-
-
-@pytest.fixture
-def expected_genre_detail(load_test_data):
-    return load_test_data('genre_by_id.json')
-
-
-@pytest.fixture
-def genre_id():
-    return "e508c1c8-1111-4136-80b4-340c4befb190"
-
-
 @pytest.mark.asyncio
 async def test_get_list_of_genres(
     prepare_genre_service,
