@@ -33,9 +33,7 @@ services:
     build: 
       context: .
       dockerfile: dockerfile-main   
-    command: "gunicorn -b 0.0.0.0:8000 --workers 4 --worker-class uvicorn.workers.UvicornWorker main:app"  
-    ports:
-      - 8000:8000
+    command: "gunicorn -b 0.0.0.0:8000 --workers 4 --worker-class uvicorn.workers.UvicornWorker main:app"      
     env_file:
       - .env
     depends_on:
@@ -54,14 +52,4 @@ services:
     ports:
       - "80:80"
   
-  tests:    
-    container_name: tests
-    build: .
-    image: asyncapi_main
-    env_file:
-      - ./src/tests/functional/.env
-    entrypoint: >
-      sh -c "pip install -r tests/functional/requirements.txt
-      && python3 tests/functional/utils/wait_for_es.py"
-    depends_on:
-      - main
+  
