@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:    
+  main-test:    
+    container_name: a_main-app-test
+    build: .
+    image: asyncapi_main  
+    command: "gunicorn -b 0.0.0.0:8080 --workers 4 --worker-class uvicorn.workers.UvicornWorker main:app"  
+    ports:
+      - 8080:8080
+    env_file:
+      - ./src/tests/functional/.env
+    
+  tests:    
+    container_name: tests
+    build: .
+    image: asyncapi_main
+    env_file:
+      - ./src/tests/functional/.env
+    entrypoint: >
+      sh -c "pip install -r tests/functional/requirements.txt
+      && python3 tests/functional/utils/wait_for_es.py
+      && python3 tests/functional/utils/wait_for_redis.py
+      && pytest tests/functional/src"
+    
