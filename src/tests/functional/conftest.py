@@ -1,22 +1,18 @@
 import asyncio
-import aiohttp
-import aioredis
-import pytest
 import os
-import orjson
-
 from dataclasses import dataclass
 
+import aiohttp
+import aioredis
+import orjson
+import pytest
 from aioredis import Redis
-from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
-from tests.functional.settings import BASE_DIR, config
+from multidict import CIMultiDictProxy
 
+from tests.functional.settings import BASE_DIR, config
 from tests.functional.utils.elastic_test_schemas import (
-    filmworks_index_schema, 
-    persons_index_schema, 
-    genres_index_schema
-)
+    filmworks_index_schema, genres_index_schema, persons_index_schema)
 from tests.functional.utils.elastic_test_service import ElasticTestService
 
 
@@ -36,7 +32,10 @@ def event_loop():
 
 @pytest.fixture()
 async def clear_redis_cache():
-    pool = aioredis.ConnectionsPool((config.REDIS_HOST, config.REDIS_PORT), minsize=10, maxsize=20)
+    pool = aioredis.ConnectionsPool(
+        (config.REDIS_HOST, config.REDIS_PORT),
+        minsize=10,
+        maxsize=20)
     redis = Redis(pool)
     await redis.flushall()
     yield
@@ -148,5 +147,3 @@ def api_person_by_id_v1_url():
 @pytest.fixture
 def api_search_film_by_person():
     return '/api/v1/person/{person_id}/film/'
-
-

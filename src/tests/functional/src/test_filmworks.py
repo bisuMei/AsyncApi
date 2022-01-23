@@ -1,6 +1,6 @@
-import pytest
 import asyncio
 
+import pytest
 from fastapi import status
 
 
@@ -32,11 +32,6 @@ def expected_film_by_genre(load_test_data):
 @pytest.fixture
 def expected_film_by_query(load_test_data):
     return load_test_data('film_by_query.json')
-
-
-@pytest.fixture
-def load_test_films_to_es(load_test_data):
-    return load_test_data('films_loads_to_es.json')
 
 
 @pytest.mark.asyncio
