@@ -12,5 +12,3 @@ RUN pip install --upgrade pip && \
 COPY ./src /code
 
 ENV PYTHONPATH "${PYTHONPATH}:/code"
-
-# CMD ["gunicorn", "-b", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "main:app"]
