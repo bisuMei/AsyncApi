@@ -5,13 +5,17 @@
 PROJECT_NAME=movies
 
 REDIS_HOST=a_redis
+
 REDIS_PORT=6379
 
 ELASTIC_HOST=a_elasticsearch
+
 ELASTIC_PORT=9200
+
 ELASTIC_INDEX={"movies": "movies", "persons": "persons", "genres": "genres"}
 
 SERVICE_HOST=a_main-app
+
 SERVICE_PORT=8000
 
 Для запуска проекта использовать докер компоуз:
@@ -23,13 +27,17 @@ docker-compose up -d
 PROJECT_NAME=movies
 
 REDIS_HOST=a_redis
+
 REDIS_PORT=6379
 
 ELASTIC_HOST=a_elasticsearch
+
 ELASTIC_PORT=9200
+
 ELASTIC_INDEX={"movies": "test_movies", "persons": "test_persons", "genres": "test_genres"}
 
 SERVICE_HOST=a_main-app-test
+
 SERVICE_PORT=8080
 
 Далее стартуем команду:
