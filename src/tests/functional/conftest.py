@@ -135,6 +135,7 @@ def api_genre_by_id_v1_url():
     return '/api/v1/genre/{genre_id}'
 
 
+@pytest.fixture
 def api_persons_v1_url():
     return '/api/v1/person/'
 
