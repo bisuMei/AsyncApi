@@ -1,17 +1,18 @@
 import asyncio
-import aiohttp
-import aioredis
-import pytest
 import os
-import orjson
-
 from dataclasses import dataclass
 
+import aiohttp
+import aioredis
+import orjson
+import pytest
 from aioredis import Redis
-from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
+from multidict import CIMultiDictProxy
+
 from tests.functional.settings import BASE_DIR, config
-from tests.functional.utils.elastic_test_schemas import filmworks_index_schema, persons_index_schema
+from tests.functional.utils.elastic_test_schemas import (
+    filmworks_index_schema, genres_index_schema, persons_index_schema)
 from tests.functional.utils.elastic_test_service import ElasticTestService
 
 
@@ -31,7 +32,10 @@ def event_loop():
 
 @pytest.fixture()
 async def clear_redis_cache():
-    pool = aioredis.ConnectionsPool((config.REDIS_HOST, config.REDIS_PORT), minsize=10, maxsize=20)
+    pool = aioredis.ConnectionsPool(
+        (config.REDIS_HOST, config.REDIS_PORT),
+        minsize=10,
+        maxsize=20)
     redis = Redis(pool)
     await redis.flushall()
     yield
@@ -111,6 +115,26 @@ def api_film_by_id_v1_url():
 
 
 @pytest.fixture
+async def prepare_genre_service(es_client, load_test_genres_to_es):
+    """Create test person_ index to es and delete after."""
+    es_service = ElasticTestService(es_client)
+    await es_service.create_index(config.ELASTIC_INDEX['genres'], genres_index_schema)
+    await es_service.bulk_store(config.ELASTIC_INDEX['genres'], load_test_genres_to_es)
+    yield
+    await es_service.delete_index(config.ELASTIC_INDEX['genres'])
+
+
+@pytest.fixture
+def api_genre_v1_url():
+    return '/api/v1/genre/'
+
+
+@pytest.fixture
+def api_genre_by_id_v1_url():
+    return '/api/v1/genre/{genre_id}'
+
+
+@pytest.fixture
 def api_persons_v1_url():
     return '/api/v1/person/'
 
@@ -123,4 +147,3 @@ def api_person_by_id_v1_url():
 @pytest.fixture
 def api_search_film_by_person():
     return '/api/v1/person/{person_id}/film/'
-

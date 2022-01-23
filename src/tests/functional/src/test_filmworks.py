@@ -1,6 +1,6 @@
-import pytest
 import asyncio
 
+import pytest
 from fastapi import status
 
 
