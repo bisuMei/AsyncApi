@@ -11,6 +11,8 @@ from aioredis import Redis
 from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
 from tests.functional.settings import BASE_DIR, config
+from tests.functional.utils.elastic_test_schemas import filmworks_index_schema, genres_index_schema
+from tests.functional.utils.elastic_test_service import ElasticTestService
 
 
 @dataclass
@@ -74,6 +76,15 @@ def load_test_data():
 
 
 @pytest.fixture
+async def prepare_service(es_client, load_test_films_to_es):
+    """Create test index for tests and delete index after."""
+    es_service = ElasticTestService(es_client)
+    await es_service.create_index(config.ELASTIC_INDEX['movies'], filmworks_index_schema)
+    await es_service.bulk_store(config.ELASTIC_INDEX['movies'], load_test_films_to_es)
+    yield
+    await es_service.delete_index(config.ELASTIC_INDEX['movies'])
+
+@pytest.fixture
 def api_films_v1_url():
     return '/api/v1/film/'
 
@@ -81,3 +92,24 @@ def api_films_v1_url():
 @pytest.fixture
 def api_film_by_id_v1_url():
     return '/api/v1/film/{film_id}'
+
+
+@pytest.fixture
+async def prepare_genre_service(es_client, load_test_genres_to_es):
+    """Create test person_ index to es and delete after."""
+    es_service = ElasticTestService(es_client)
+    await es_service.create_index(config.ELASTIC_INDEX['genres'], genres_index_schema)
+    await es_service.bulk_store(config.ELASTIC_INDEX['genres'], load_test_genres_to_es)
+    yield
+    await es_service.delete_index(config.ELASTIC_INDEX['genres'])
+
+
+@pytest.fixture
+def api_genre_v1_url():
+    return '/api/v1/genre/'
+
+
+@pytest.fixture
+def api_genre_by_id_v1_url():
+    return '/api/v1/genre/{genre_id}'
+
