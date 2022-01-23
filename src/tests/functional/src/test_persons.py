@@ -4,36 +4,6 @@ import pytest
 from fastapi import status
 
 
-@pytest.fixture
-def load_test_persons_to_es(load_test_data):
-    return load_test_data('persons_load_to_es.json')
-
-
-@pytest.fixture
-def expected_persons_list(load_test_data):
-    return load_test_data('persons_list.json')
-
-
-@pytest.fixture
-def expected_person_detail(load_test_data):
-    return load_test_data('person_by_id.json')
-
-
-@pytest.fixture
-def expected_person_by_query(load_test_data):
-    return load_test_data('person_by_query.json')
-
-
-@pytest.fixture
-def expected_film_by_person(load_test_data):
-    return load_test_data('film_by_person.json')
-
-
-@pytest.fixture
-def person_id():
-    return "2d6f6284-13ce-4d25-9453-c4335432c116"
-
-
 @pytest.mark.asyncio
 async def test_get_list_of_persons(
     prepare_person_service,
@@ -63,7 +33,7 @@ async def test_get_person_by_id(
     response = await make_get_request(url)
 
     assert response.status == status.HTTP_200_OK
-    assert response.body == expected_person_detail
+    assert response.body == expected_person_detail[0]
 
 
 @pytest.mark.asyncio
@@ -107,11 +77,11 @@ async def test_person_search_by_query(
     make_get_request,
     api_persons_v1_url,
     clear_redis_cache,
-    expected_person_by_query,
+    expected_person_detail,
 ):
     await asyncio.sleep(1)
 
-    response = await make_get_request(api_persons_v1_url, params={'query': 'Lloyd'})
+    response = await make_get_request(api_persons_v1_url, params={'query': 'Driver'})
     assert response.status == status.HTTP_200_OK
-    assert response.body == expected_person_by_query
+    assert response.body == expected_person_detail
 

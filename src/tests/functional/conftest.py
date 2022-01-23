@@ -11,9 +11,12 @@ from elasticsearch import AsyncElasticsearch
 from multidict import CIMultiDictProxy
 
 from tests.functional.settings import BASE_DIR, config
-from tests.functional.utils.elastic_test_schemas import (
-    filmworks_index_schema, genres_index_schema, persons_index_schema)
-from tests.functional.utils.elastic_test_service import ElasticTestService
+
+pytest_plugins = (
+    "tests.functional.utils.film_conftest",
+    "tests.functional.utils.persons_conftest",
+    "tests.functional.utils.genre_conftest",
+)
 
 
 @dataclass
@@ -35,7 +38,8 @@ async def clear_redis_cache():
     pool = aioredis.ConnectionsPool(
         (config.REDIS_HOST, config.REDIS_PORT),
         minsize=10,
-        maxsize=20)
+        maxsize=20,
+    )
     redis = Redis(pool)
     await redis.flushall()
     yield
@@ -77,73 +81,3 @@ def load_test_data():
         with open(os.path.join(BASE_DIR, 'testdata', filename)) as file:
             return orjson.loads(file.read())
     return load_data
-
-
-@pytest.fixture
-async def prepare_film_service(es_client, load_test_films_to_es):
-    """Create test index for tests and delete index after."""
-    es_service = ElasticTestService(es_client)
-    await es_service.create_index(config.ELASTIC_INDEX['movies'], filmworks_index_schema)
-    await es_service.bulk_store(config.ELASTIC_INDEX['movies'], load_test_films_to_es)
-    yield
-    await es_service.delete_index(config.ELASTIC_INDEX['movies'])
-
-
-@pytest.fixture
-async def prepare_person_service(es_client, load_test_persons_to_es):
-    """Create test person_ index to es and delete after."""
-    es_service = ElasticTestService(es_client)
-    await es_service.create_index(config.ELASTIC_INDEX['persons'], persons_index_schema)
-    await es_service.bulk_store(config.ELASTIC_INDEX['persons'], load_test_persons_to_es)
-    yield
-    await es_service.delete_index(config.ELASTIC_INDEX['persons'])
-
-
-@pytest.fixture
-def load_test_films_to_es(load_test_data):
-    return load_test_data('films_loads_to_es.json')
-
-
-@pytest.fixture
-def api_films_v1_url():
-    return '/api/v1/film/'
-
-
-@pytest.fixture
-def api_film_by_id_v1_url():
-    return '/api/v1/film/{film_id}'
-
-
-@pytest.fixture
-async def prepare_genre_service(es_client, load_test_genres_to_es):
-    """Create test person_ index to es and delete after."""
-    es_service = ElasticTestService(es_client)
-    await es_service.create_index(config.ELASTIC_INDEX['genres'], genres_index_schema)
-    await es_service.bulk_store(config.ELASTIC_INDEX['genres'], load_test_genres_to_es)
-    yield
-    await es_service.delete_index(config.ELASTIC_INDEX['genres'])
-
-
-@pytest.fixture
-def api_genre_v1_url():
-    return '/api/v1/genre/'
-
-
-@pytest.fixture
-def api_genre_by_id_v1_url():
-    return '/api/v1/genre/{genre_id}'
-
-
-@pytest.fixture
-def api_persons_v1_url():
-    return '/api/v1/person/'
-
-
-@pytest.fixture
-def api_person_by_id_v1_url():
-    return '/api/v1/person/{person_id}'
-
-
-@pytest.fixture
-def api_search_film_by_person():
-    return '/api/v1/person/{person_id}/film/'
