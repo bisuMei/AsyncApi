@@ -112,5 +112,3 @@ async def test_film_search_query(
     response = await make_get_request(api_films_v1_url, params={'query': 'Leonard'})
     assert response.status == status.HTTP_200_OK
     assert response.body == expected_film_by_query
-    print(response.body)
-    print(expected_film_by_query)

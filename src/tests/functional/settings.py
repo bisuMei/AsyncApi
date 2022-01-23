@@ -5,7 +5,8 @@ from environs import Env
 
 from pydantic import BaseSettings
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 Env.read_env()
 
 

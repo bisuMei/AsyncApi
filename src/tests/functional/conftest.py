@@ -10,10 +10,9 @@ from dataclasses import dataclass
 from aioredis import Redis
 from multidict import CIMultiDictProxy
 from elasticsearch import AsyncElasticsearch
-from src.tests.functional.settings import BASE_DIR
-from src.tests.functional.settings import config
-from src.tests.functional.utils.elastic_test_schemas import filmworks_index_schema, persons_index_schema
-from src.tests.functional.utils.elastic_test_service import ElasticTestService
+from tests.functional.settings import BASE_DIR, config
+from tests.functional.utils.elastic_test_schemas import filmworks_index_schema, persons_index_schema
+from tests.functional.utils.elastic_test_service import ElasticTestService
 
 
 @dataclass
@@ -71,7 +70,7 @@ def make_get_request(session):
 @pytest.fixture
 def load_test_data():
     def load_data(filename: str):
-        with open(os.path.join(BASE_DIR, 'functional', 'testdata', filename)) as file:
+        with open(os.path.join(BASE_DIR, 'testdata', filename)) as file:
             return orjson.loads(file.read())
     return load_data
 
