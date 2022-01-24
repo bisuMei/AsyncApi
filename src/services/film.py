@@ -5,6 +5,7 @@ from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, exceptions
 from fastapi import Depends, HTTPException
 
+from db.async_cache import AsyncCache
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.schemas import Film, FilmShort
@@ -14,7 +15,7 @@ from core.config import config
 
 
 class FilmService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
+    def __init__(self, redis: AsyncCache, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
         self._redis_service = RedisService(self.redis)
@@ -85,7 +86,7 @@ class FilmService:
 
 @lru_cache()
 def get_film_service(
-        redis: Redis = Depends(get_redis),
+        async_cache_storage: AsyncCache = Depends(get_redis),
         elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> FilmService:
-    return FilmService(redis, elastic)
+    return FilmService(async_cache_storage, elastic)

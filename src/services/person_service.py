@@ -5,6 +5,7 @@ from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, exceptions
 from fastapi import Depends, HTTPException
 
+from db.async_cache import AsyncCache
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.schemas import FilmShort, Person
@@ -14,7 +15,6 @@ from core.config import config
 
 
 class PersonService:
-
     def __init__(self, redis, elastic):
         self.redis = redis
         self.elastic = elastic
@@ -101,7 +101,7 @@ class PersonService:
 
 @lru_cache()
 def get_person_service(
-        redis: Redis = Depends(get_redis),
+        async_cache_storage: AsyncCache = Depends(get_redis),
         elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> PersonService:
-    return PersonService(redis, elastic)
+    return PersonService(async_cache_storage, elastic)

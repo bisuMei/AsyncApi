@@ -5,6 +5,7 @@ from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, exceptions
 from fastapi import Depends, HTTPException
 
+from db.async_cache import AsyncCache
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.schemas import Genre, GenreShort
@@ -14,7 +15,6 @@ from core.config import config
 
 
 class GenreService:
-
     def __init__(self, redis, elastic):
         self.redis = redis
         self.elastic = elastic
@@ -54,7 +54,7 @@ class GenreService:
 
 @lru_cache()
 def get_genre_service(
-        redis: Redis = Depends(get_redis),
+        async_cache_storage: AsyncCache = Depends(get_redis),
         elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> GenreService:
-    return GenreService(redis, elastic)
+    return GenreService(async_cache_storage, elastic)
