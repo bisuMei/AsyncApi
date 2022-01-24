@@ -6,6 +6,7 @@ from elasticsearch import AsyncElasticsearch, exceptions
 from fastapi import Depends, HTTPException
 
 from db.async_cache import AsyncCache
+from db.async_search_engin import AsyncSearchEngin
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.schemas import Genre, GenreShort
@@ -55,6 +56,6 @@ class GenreService:
 @lru_cache()
 def get_genre_service(
         async_cache_storage: AsyncCache = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+        async_search_engin: AsyncSearchEngin = Depends(get_elastic),
 ) -> GenreService:
-    return GenreService(async_cache_storage, elastic)
+    return GenreService(async_cache_storage, async_search_engin)
