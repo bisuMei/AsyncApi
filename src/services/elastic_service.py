@@ -45,7 +45,7 @@ class ElasticSearchService:
         doc = await self.es.search(index=index, body=query)
         return doc
  
-    async def make_query(
+    async def make_film_query(
         self,
         query_obj: dict,
         query_params: QueryParameters
@@ -78,6 +78,20 @@ class ElasticSearchService:
                 }
             }
 
+        query_obj['size'] = query_params.limit if query_params.limit else 10
+        query_obj['from'] = int(query_params.page) * int(query_obj['size']) - int(query_obj['size']) if query_params.page else 0
+
+        return query_obj
+    
+    async def make_person_query(
+        self,
+        query_obj: dict,
+        query_params: QueryParameters
+    ) -> dict:
+        print(query_params)
+        if query_params.query:            
+            ElasticSearchService.person_query['match']['full_name']['query'] = query_params.query
+            query_obj['query'] = ElasticSearchService.person_query
         query_obj['size'] = query_params.limit if query_params.limit else 10
         query_obj['from'] = int(query_params.page) * int(query_obj['size']) - int(query_obj['size']) if query_params.page else 0
 

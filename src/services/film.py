@@ -59,7 +59,7 @@ class FilmService:
         """
         query_obj = {'_source': [field for field in FilmShort.__fields__.keys()]}
         
-        query_ = await self.elastic_service.make_query(
+        query_ = await self.elastic_service.make_film_query(
             query_obj=query_obj, 
             query_params=QueryParameters(
                 sort=sort, 
