@@ -1,23 +1,22 @@
-import logging
-import sys
-import time 
-
 from elasticsearch import Elasticsearch
 
+from tests.functional.utils.backoff import backoff
 from tests.functional.settings import config
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler(stream=sys.stdout)
-logger.addHandler(handler)
+class FailConnectinonElasticSearch(Exception):
+    pass
 
 
-while True:
-    es = Elasticsearch(hosts=[config.ELASTIC_HOST], port=config.ELASTIC_PORT)
-    if es.ping():
-        logger.info("Success connect to elastic")
-        break
-    else:
-        time.sleep(0.5)
-        logger.info("Establishing connection to elastic...")
+@backoff(start_sleep_time=1, factor=2, border_sleep_time=20)
+def wait_es():    
+    es = Elasticsearch(
+        hosts=[config.ELASTIC_HOST], 
+        port=config.ELASTIC_PORT, 
+        verify_certs=True)
+    if not es.ping():        
+        raise FailConnectinonElasticSearch('Fail connectinon to ElasticSearch')
+    
+
+if __name__ == '__main__':
+    wait_es()

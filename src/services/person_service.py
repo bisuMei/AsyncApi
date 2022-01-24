@@ -5,16 +5,17 @@ from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, exceptions
 from fastapi import Depends, HTTPException
 
+from db.async_cache import AsyncCache
+from db.async_search_engin import AsyncSearchEngin
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.schemas import FilmShort, Person
 from services.redis_service import RedisService
-from services.elastic_service import ElasticSearchService
+from services.elastic_service import ElasticSearchService, QueryParameters
 from core.config import config
 
 
 class PersonService:
-
     def __init__(self, redis, elastic):
         self.redis = redis
         self.elastic = elastic
@@ -62,7 +63,16 @@ class PersonService:
             query: Optional[str] = None,
     ) -> List[Person]:
         """Return persons by query params."""
-        query_ = self._make_search_query(limit, page, query)
+        query_obj = {'_source': [field for field in Person.__fields__.keys()]}
+        query_ = await self.elastic_service.make_person_query(
+            query_obj=query_obj,
+            query_params=QueryParameters(                
+                limit=limit, 
+                page=page,                 
+                query=query
+        ))
+        print(query_)
+            
         params = {f"{limit}_limit", f"{page}_page", query}
         key = 'persons_query_' + '_'.join(param for param in params if param)
         
@@ -75,22 +85,6 @@ class PersonService:
                 await self._redis_service.put_models_list_to_cache(key, persons_list)
         return persons_list
 
-    def _make_search_query(
-        self,
-        limit: Optional[str] = None,
-        page: Optional[str] = None,
-        query: Optional[str] = None,
-    ) -> dict:
-        query_obj = {'_source': [field for field in Person.__fields__.keys()]}
-        if query:
-            person_query = self.elastic_service.person_query
-            person_query['match']['full_name']['query'] = query
-            query_obj['query'] = person_query
-        query_obj['size'] = limit if limit else 10
-        query_obj['from'] = int(page) * int(query_obj['size']) - int(query_obj['size']) if page else 0
-
-        return query_obj
-
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
         try:
             doc = await self.elastic_service.get(config.ELASTIC_INDEX['persons'], person_id)
@@ -101,7 +95,7 @@ class PersonService:
 
 @lru_cache()
 def get_person_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+        async_cache_storage: AsyncCache = Depends(get_redis),
+        async_search_engin: AsyncSearchEngin = Depends(get_elastic),
 ) -> PersonService:
-    return PersonService(redis, elastic)
+    return PersonService(async_cache_storage, async_search_engin)
