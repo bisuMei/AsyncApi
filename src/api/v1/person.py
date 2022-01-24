@@ -42,7 +42,10 @@ async def films_by_person(
     '/',
     response_model=List[Person],
     summary='Persons list details.',
-    description='Get list of persons.',
+    description='Get list of persons. \
+        Pagination available. \
+        `limit` - number of films per `page` (10 by default). \
+        `query` - for serach by full name',
     response_description='List of persons details with id, full_name, roles, films_ids',
 )
 async def persons(
