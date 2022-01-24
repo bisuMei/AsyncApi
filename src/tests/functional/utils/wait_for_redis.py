@@ -1,24 +1,21 @@
-import logging
-import sys
-import time 
+import redis
 
-import redis 
-
+from tests.functional.utils.backoff import backoff 
 from tests.functional.settings import config
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler(stream=sys.stdout)
-logger.addHandler(handler)
+class FailConnectinonRedis(Exception):
+    pass
 
 
-while True:
+@backoff(start_sleep_time=1, factor=2, border_sleep_time=20)
+def wait_redis():    
     try:
-        re = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, socket_connect_timeout=1)    
-        re.ping()
-        logger.info("Success connect to redis")
-        break           
-    except redis.exceptions.ConnectionError:        
-        logger.info("Establishing connection to redis...")
-        time.sleep(0.5)
+        re = redis.Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, socket_connect_timeout=1)              
+        re.ping()    
+    except redis.exceptions.ConnectionError:
+        raise FailConnectinonRedis('Fail connectinon to Redis')
+    
+
+if __name__ == '__main__':
+    wait_redis()
