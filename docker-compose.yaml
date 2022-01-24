@@ -14,9 +14,7 @@ services:
         soft: -1
         hard: -1         
     expose:  
-      - "9200"
-    ports:
-      - 9200:9200
+      - "9200"    
     volumes:
       - ${PWD}/elasticsearch-data:/usr/share/elasticsearch/data
   
@@ -24,7 +22,7 @@ services:
     image: redis:6.2.6
     container_name: a_redis        
     expose:
-      - "6379"
+      - "6379"    
     command:
       - redis-server   
     volumes:
