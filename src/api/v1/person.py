@@ -4,8 +4,9 @@ from fastapi import APIRouter
 from fastapi.param_functions import Depends
 
 from models.schemas import FilmShort, Person
+from services.auth_handler import JWTBearer, get_permissions
 from services.person_service import PersonService, get_person_service
-
+from utils.constants import ACTION
 
 router = APIRouter()
 
@@ -16,12 +17,15 @@ router = APIRouter()
     summary="Person details.",
     description="Person details with id, full_name, roles, films_ids",
     response_description="Person details by id.",
+    dependencies=[Depends(JWTBearer())],
 )
 async def person_details(
     person_id: str,    
-    person_service: PersonService = Depends(get_person_service)
+    person_service: PersonService = Depends(get_person_service),
+    token: str = Depends(JWTBearer()),
 ) -> Person:
-    return await person_service.get_by_id(person_id)
+    if await get_permissions(ACTION.person_by_id, token):
+        return await person_service.get_by_id(person_id)
 
 
 @router.get(
@@ -30,12 +34,15 @@ async def person_details(
     summary='Film details by person.',
     description='Film details with title, imdb_rating, description, persons, genres',
     response_description='Film with details by person id.',
+    dependencies=[Depends(JWTBearer())],
 )
 async def films_by_person(
     person_id: str,
-    person_service: PersonService = Depends(get_person_service)
-) -> List[FilmShort]:        
-    return await person_service.get_films_by_person(person_id)
+    person_service: PersonService = Depends(get_person_service),
+    token: str = Depends(JWTBearer()),
+) -> List[FilmShort]:
+    if await get_permissions(ACTION.film_by_person, token):
+        return await person_service.get_films_by_person(person_id)
 
 
 @router.get(
@@ -47,11 +54,14 @@ async def films_by_person(
         `limit` - number of films per `page` (10 by default). \
         `query` - for serach by full name',
     response_description='List of persons details with id, full_name, roles, films_ids',
+    dependencies=[Depends(JWTBearer())],
 )
 async def persons(
-        limit: Optional[str] = None,
-        page: Optional[str] = None,
-        query: Optional[str] = None,
-        person_service: PersonService = Depends(get_person_service)
-) -> List[Person]:        
-    return await person_service.search_persons(limit, page, query)
+    limit: Optional[str] = None,
+    page: Optional[str] = None,
+    query: Optional[str] = None,
+    person_service: PersonService = Depends(get_person_service),
+    token: str = Depends(JWTBearer()),
+) -> List[Person]:
+    if await get_permissions(ACTION.persons, token):
+        return await person_service.search_persons(limit, page, query)

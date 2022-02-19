@@ -1,16 +1,21 @@
 import asyncio
 import os
-from dataclasses import dataclass
 
 import aiohttp
 import aioredis
+import jwt
 import orjson
 import pytest
+
+from dataclasses import dataclass
+from datetime import datetime, timezone, timedelta
+
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch
 from multidict import CIMultiDictProxy
 
 from tests.functional.settings import BASE_DIR, config
+from utils.constants import ACCESS_TOKEN_TTL, USER_ROLES, PERMISSIONS
 
 pytest_plugins = (
     "tests.functional.utils.film_conftest",
@@ -54,8 +59,12 @@ async def es_client():
 
 
 @pytest.fixture(scope='session')
-async def session():
-    session = aiohttp.ClientSession()
+async def session(create_token):
+    token = create_token
+    headers = {
+        "Authorization": f"Bearer {token.decode('utf-8')}",
+    }
+    session = aiohttp.ClientSession(headers=headers)
     yield session
     await session.close()
 
@@ -81,3 +90,17 @@ def load_test_data():
         with open(os.path.join(BASE_DIR, 'testdata', filename)) as file:
             return orjson.loads(file.read())
     return load_data
+
+
+@pytest.fixture(scope='session')
+def create_token() -> bytes:
+    payload = {}
+    now = datetime.now(timezone.utc)
+    expire = datetime.timestamp(now + timedelta(hours=ACCESS_TOKEN_TTL))
+    payload["type"] = "access"
+    payload["exp"] = expire
+    payload["iat"] = datetime.utcnow()
+    payload["sub"] = "123-456"
+    payload["perms"] = [{USER_ROLES.admin: PERMISSIONS.admin_permissions}]
+
+    yield jwt.encode(payload, config.JWT_SECRET)
