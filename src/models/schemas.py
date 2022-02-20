@@ -61,3 +61,8 @@ class Person(BaseOrjsonModel):
     role: List[str]
     film_ids: Optional[List[str]]
 
+
+class PermissionRole(BaseOrjsonModel):
+
+    name: str
+    permissions: dict

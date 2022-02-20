@@ -25,5 +25,7 @@ class Config(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: int
 
+    JWT_SECRET: str
+
 
 config = Config()

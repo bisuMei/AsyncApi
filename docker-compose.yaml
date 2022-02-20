@@ -1,9 +1,9 @@
 version: "3.8"
 
-services:  
+services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
-    container_name: a_elasticsearch        
+    container_name: a_elasticsearch
     environment:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
@@ -12,44 +12,43 @@ services:
     ulimits:
       memlock:
         soft: -1
-        hard: -1         
-    expose:  
-      - "9200"    
+        hard: -1
+    expose:
+      - "9200"
     volumes:
       - ${PWD}/elasticsearch-data:/usr/share/elasticsearch/data
-  
+
   redis:
     image: redis:6.2.6
-    container_name: a_redis        
+    container_name: a_redis
     expose:
-      - "6379"    
+      - "6379"
     command:
-      - redis-server   
+      - redis-server
     volumes:
       - ${PWD}/redis-data:/data
 
-  main:    
+  main:
     container_name: a_main-app
-    build: 
+    build:
       context: .
-      dockerfile: dockerfile-main   
-    command: "gunicorn -b 0.0.0.0:8000 --workers 4 --worker-class uvicorn.workers.UvicornWorker main:app"      
+      dockerfile: dockerfile-main
+    command: "gunicorn -b 0.0.0.0:8000 --workers 4 --worker-class uvicorn.workers.UvicornWorker main:app"
     env_file:
       - .env
     depends_on:
       - elasticsearch
       - redis
-  
+
   nginx:
-    build: 
+    build:
       context: .
-      dockerfile: dockerfile-nginx        
+      dockerfile: dockerfile-nginx
     volumes:
       - ./nginx:/etc/nginx
-      - ./nginx/conf.d:/etc/nginx/conf.d            
+      - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
       - main
     ports:
       - "80:80"
-  
-  
+

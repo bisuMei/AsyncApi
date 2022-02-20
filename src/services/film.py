@@ -1,7 +1,6 @@
 from functools import lru_cache
 from typing import List, Optional
 
-from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, exceptions
 from fastapi import Depends, HTTPException
 
