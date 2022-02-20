@@ -1,46 +1,26 @@
-Проектная работа 4 и 5го спринта
+##Проектная работа 4, 5го и 7го спринта
 
-Переменные которые надо указать в .env для развертывания ASYNC_API:
+##Переменные которые надо указать в .env предоставлены в .env.simple для развертывания ASYNC_API:
 
-PROJECT_NAME=movies
+### Микросервис поддерживает контракт из AuthService
 
-REDIS_HOST=a_redis
+###Для просмотра документации http://localhost/api/openapi#/
 
-REDIS_PORT=6379
+###При обращении к ендпоинтам сервиса требуется валидный jwt access token который можно получить при регистрации и последующем логине в AuthService
 
-ELASTIC_HOST=a_elasticsearch
+![image](https://user-images.githubusercontent.com/62523428/154866443-19e5c1e3-3b71-44dc-84fc-a2f02bb6cef7.png)
 
-ELASTIC_PORT=9200
+![image](https://user-images.githubusercontent.com/62523428/154866476-f39f9ca1-b8d8-4063-a9ec-a0f845366aa0.png)
 
-ELASTIC_INDEX={"movies": "movies", "persons": "persons", "genres": "genres"}
 
-SERVICE_HOST=a_main-app
 
-SERVICE_PORT=8000
 
-Для запуска проекта использовать докер компоуз:
+Запускаем контейнеры:
 
 docker-compose up -d
 
-Для запуска тестового окружения в директории tests/functional/.env прописать:
 
-PROJECT_NAME=movies
-
-REDIS_HOST=a_redis
-
-REDIS_PORT=6379
-
-ELASTIC_HOST=a_elasticsearch
-
-ELASTIC_PORT=9200
-
-ELASTIC_INDEX={"movies": "test_movies", "persons": "test_persons", "genres": "test_genres"}
-
-SERVICE_HOST=a_main-app-test
-
-SERVICE_PORT=8080
-
-Далее стартуем команду:
+Для запуска тестового контейнера:
 
 docker-compose -f docker-compose.tests.yaml up -d
 
