@@ -7,6 +7,7 @@ from models.schemas import FilmShort, Person
 from services.auth_handler import JWTBearer, get_permissions
 from services.person_service import PersonService, get_person_service
 from utils.constants import ACTION
+from utils.decorators import auth_required
 
 router = APIRouter()
 
@@ -19,6 +20,7 @@ router = APIRouter()
     response_description="Person details by id.",
     dependencies=[Depends(JWTBearer())],
 )
+@auth_required(ACTION.person_by_id)
 async def person_details(
     person_id: str,    
     person_service: PersonService = Depends(get_person_service),
@@ -36,6 +38,7 @@ async def person_details(
     response_description='Film with details by person id.',
     dependencies=[Depends(JWTBearer())],
 )
+@auth_required(ACTION.film_by_person)
 async def films_by_person(
     person_id: str,
     person_service: PersonService = Depends(get_person_service),
@@ -56,6 +59,7 @@ async def films_by_person(
     response_description='List of persons details with id, full_name, roles, films_ids',
     dependencies=[Depends(JWTBearer())],
 )
+@auth_required(ACTION.persons)
 async def persons(
     limit: Optional[str] = None,
     page: Optional[str] = None,

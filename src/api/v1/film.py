@@ -6,7 +6,7 @@ from models.schemas import Film, FilmShort
 from services import film
 from services.auth_handler import JWTBearer, get_permissions
 from utils.constants import ACTION
-
+from utils.decorators import auth_required
 
 router = APIRouter()
 
@@ -19,13 +19,13 @@ router = APIRouter()
     response_description='Film with details by id',
     dependencies=[Depends(JWTBearer())],
 )
+@auth_required(ACTION.film_by_id)
 async def film_details(
     film_id: str,
     film_service: film.FilmService = Depends(film.get_film_service),
     token: str = Depends(JWTBearer()),
 ) -> Film:
-    if await get_permissions(ACTION.film_by_id, token):
-        return await film_service.get_by_id(film_id)
+    return await film_service.get_by_id(film_id)
 
 
 @router.get(
@@ -40,6 +40,7 @@ async def film_details(
     response_description='Films list with id, title, imdb_rating',
     dependencies=[Depends(JWTBearer())],
 )
+@auth_required(ACTION.films)
 async def films(
     film_service: film.FilmService = Depends(film.get_film_service),
     token: str = Depends(JWTBearer()),
@@ -49,5 +50,4 @@ async def films(
     filter_: Optional[str] = None,
     query: Optional[str] = None
 ) -> List[FilmShort]:
-    if await get_permissions(ACTION.films, token):
-        return await film_service.get_films_list(sort, limit, page, filter_, query)
+    return await film_service.get_films_list(sort, limit, page, filter_, query)

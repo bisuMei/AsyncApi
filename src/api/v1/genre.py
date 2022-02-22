@@ -7,6 +7,7 @@ from models.schemas import GenreShort
 from services.auth_handler import get_permissions, JWTBearer
 from services.genre_service import get_genre_service, GenreService
 from utils.constants import ACTION
+from utils.decorators import auth_required
 
 router = APIRouter()
 
@@ -19,6 +20,7 @@ router = APIRouter()
     response_description='Genres details by id.',
     dependencies=[Depends(JWTBearer())],
 )
+@auth_required(ACTION.genre_by_id)
 async def genre_details(
     genre_id: str,
     genre_service: GenreService = Depends(get_genre_service),
@@ -36,6 +38,7 @@ async def genre_details(
     response_description="Genres list",
     dependencies=[Depends(JWTBearer())],
 )
+@auth_required(ACTION.genres)
 async def genres_list(
     genre_service: GenreService = Depends(get_genre_service),
     token: str = Depends(JWTBearer()),
