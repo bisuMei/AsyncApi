@@ -26,8 +26,7 @@ async def person_details(
     person_service: PersonService = Depends(get_person_service),
     token: str = Depends(JWTBearer()),
 ) -> Person:
-    if await get_permissions(ACTION.person_by_id, token):
-        return await person_service.get_by_id(person_id)
+    return await person_service.get_by_id(person_id)
 
 
 @router.get(
@@ -44,8 +43,7 @@ async def films_by_person(
     person_service: PersonService = Depends(get_person_service),
     token: str = Depends(JWTBearer()),
 ) -> List[FilmShort]:
-    if await get_permissions(ACTION.film_by_person, token):
-        return await person_service.get_films_by_person(person_id)
+    return await person_service.get_films_by_person(person_id)
 
 
 @router.get(
@@ -67,5 +65,4 @@ async def persons(
     person_service: PersonService = Depends(get_person_service),
     token: str = Depends(JWTBearer()),
 ) -> List[Person]:
-    if await get_permissions(ACTION.persons, token):
-        return await person_service.search_persons(limit, page, query)
+    return await person_service.search_persons(limit, page, query)

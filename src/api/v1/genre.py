@@ -26,8 +26,7 @@ async def genre_details(
     genre_service: GenreService = Depends(get_genre_service),
     token: str = Depends(JWTBearer()),
 ) -> Optional[GenreShort]:
-    if await get_permissions(ACTION.genre_by_id, token):
-        return await genre_service.get_by_id(genre_id)
+    return await genre_service.get_by_id(genre_id)
 
 
 @router.get(
@@ -43,5 +42,4 @@ async def genres_list(
     genre_service: GenreService = Depends(get_genre_service),
     token: str = Depends(JWTBearer()),
 ) -> List[GenreShort]:
-    if await get_permissions(ACTION.genres, token):
-        return await genre_service.get_genres_list()
+    return await genre_service.get_genres_list()
