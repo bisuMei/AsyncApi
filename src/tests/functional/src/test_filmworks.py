@@ -13,7 +13,7 @@ async def test_get_list_of_films(
     clear_redis_cache,
 ):
     await asyncio.sleep(1)
-
+    #test_bot
     response = await make_get_request(api_films_v1_url)
 
     assert response.status == status.HTTP_200_OK
