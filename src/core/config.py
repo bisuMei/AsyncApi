@@ -12,7 +12,7 @@ Env.read_env()
 # Logger Settings
 logging_config.dictConfig(LOGGING)
 
-
+# settings conf
 class Config(BaseSettings):
     """Base settings"""
 
