@@ -23,9 +23,9 @@ jobs:
           pip install wemake-python-styleguide flake8-html
       - name: lint-codestyle
         run: |
-          flake8 src/api --format=html --htmldir=lint_report/src/api/wemake-python-styleguide/
+          flake8 src/api --exit-zero --format=html --htmldir=lint_report/src/api/wemake-python-styleguide/
       - name: load-report
         uses: actions/upload-artifact@v3.1.0
         with:
           name: lint_report
-          path: lint_report/src/api/wemake-python-styleguide/
+          path: lint_report/
