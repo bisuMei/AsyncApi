@@ -18,5 +18,3 @@ jobs:
     steps:
     - name: wemake-python-styleguide
       uses: wemake-services/wemake-python-styleguide
-      with:
-        path: ./setup.cfg
