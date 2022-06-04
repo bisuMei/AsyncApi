@@ -15,7 +15,7 @@ async def test_get_list_of_films(
     await asyncio.sleep(1)
 
     response = await make_get_request(api_films_v1_url)
-
+    #test_telegram
     assert response.status == status.HTTP_200_OK
     assert response.body == expected_films_list
 
