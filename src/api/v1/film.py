@@ -10,7 +10,7 @@ from utils.decorators import auth_required
 
 router = APIRouter()
 
-
+#test_ci
 @router.get(
     '/{film_id}',
     response_model=Film,
