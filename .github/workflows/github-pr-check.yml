@@ -1,0 +1,25 @@
+name: Linter check
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.9" ]
+
+  steps:
+  - uses: actions/checkout@v3
+  - name: wemake-python-styleguide
+    uses: wemake-services/wemake-python-styleguide
+    with:
+      path: ./setup.cfg
+    run: |
+      flake8 .
