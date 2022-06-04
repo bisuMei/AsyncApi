@@ -19,7 +19,7 @@ async def test_get_list_of_films(
     assert response.status == status.HTTP_200_OK
     assert response.body == expected_films_list
 
-
+# new_test
 @pytest.mark.asyncio
 async def test_get_film_by_id(
     prepare_film_service,
