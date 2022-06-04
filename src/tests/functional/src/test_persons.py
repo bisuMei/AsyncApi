@@ -19,7 +19,7 @@ async def test_get_list_of_persons(
     assert response.status == status.HTTP_200_OK
     assert response.body == expected_persons_list
 
-
+# test_ci
 @pytest.mark.asyncio
 async def test_get_person_by_id(
     prepare_person_service,
