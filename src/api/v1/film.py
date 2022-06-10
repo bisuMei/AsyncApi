@@ -51,3 +51,4 @@ async def films(
     query: Optional[str] = None
 ) -> List[FilmShort]:
     return await film_service.get_films_list(sort, limit, page, filter_, query)
+    # test-load
